@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Button, Container, Grid, Card, CardContent, CardMedia, CardActionArea } from '@mui/material';
+import { Box, Typography, Button, Grid, Card, CardContent, CardMedia, CardActionArea } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useQuizContext } from '../context/QuizContext';
 
@@ -19,7 +19,7 @@ const HomePage = () => {
   const featuredCategories = categories.slice(0, 6);
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+    <Box sx={{ mb: 4 }}>
       {/* Hero Section */}
       <Box
         sx={{
@@ -28,8 +28,8 @@ const HomePage = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           mb: 8,
-          mt: 4,
-          pt: 4
+          mt: 2,
+          pt: 2
         }}
       >
         <Box sx={{ maxWidth: { xs: '100%', md: '50%' }, mb: { xs: 4, md: 0 } }}>
@@ -308,7 +308,7 @@ const HomePage = () => {
           Get Started
         </Button>
       </Box>
-    </Container>
+    </Box>
   );
 };
 
