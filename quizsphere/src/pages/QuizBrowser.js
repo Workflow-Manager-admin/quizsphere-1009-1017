@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Box, 
-  Container, 
   Typography, 
   Grid, 
   Card, 
@@ -103,8 +102,8 @@ const QuizBrowser = () => {
   };
   
   return (
-    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
-      <Box sx={{ mb: 6, pt: 4 }}>
+    <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 6, pt: 2 }}>
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
           Browse Quizzes
         </Typography>
@@ -354,7 +353,7 @@ const QuizBrowser = () => {
           </Button>
         </Box>
       )}
-    </Container>
+    </Box>
   );
 };
 
