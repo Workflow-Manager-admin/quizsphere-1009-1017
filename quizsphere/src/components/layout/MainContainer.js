@@ -4,15 +4,15 @@ import {
   Box, 
   useTheme, 
   useMediaQuery, 
-  CircularProgress, 
-  Fade,
-  Grow,
-  Slide,
   Typography,
   alpha
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
+
+// Import custom UI components
+import ContainerTransition from '../ui/ContainerTransition';
+import LoadingOverlay from '../ui/LoadingOverlay';
 
 // PUBLIC_INTERFACE
 /**
@@ -109,29 +109,6 @@ const MainContainer = ({
     };
   };
   
-  // Render loading state
-  const renderLoading = () => (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        minHeight: '200px',
-        flexDirection: 'column',
-        gap: 2
-      }}
-    >
-      <CircularProgress 
-        color="primary" 
-        size={isMobile ? 40 : 60}
-        thickness={4}
-      />
-      <Typography variant="body1" color="text.secondary">
-        Loading content...
-      </Typography>
-    </Box>
-  );
-  
   // Render error state
   const renderError = () => (
     <Box 
@@ -157,21 +134,6 @@ const MainContainer = ({
       </Typography>
     </Box>
   );
-  
-  // Content transition wrapper
-  const ContentTransition = ({ children }) => {
-    if (disableAnimations) return children;
-    
-    return (
-      <Fade in timeout={300}>
-        <Box>
-          <Slide direction="up" in timeout={400} mountOnEnter unmountOnExit>
-            <Box>{children}</Box>
-          </Slide>
-        </Box>
-      </Fade>
-    );
-  };
   
   return (
     <Box
@@ -210,25 +172,26 @@ const MainContainer = ({
         aria-label="Main content"
       >
         {/* Show loading spinner when in loading state */}
-        {loading && renderLoading()}
+        <LoadingOverlay
+          loading={loading}
+          message="Loading content..."
+          type="container"
+          transparent={true}
+        />
         
         {/* Show error message when there's an error */}
         {error && renderError()}
         
         {/* Render children with transition if not loading or error */}
         {!loading && !error && (
-          <Grow 
-            in 
-            key={key} 
-            timeout={disableAnimations ? 0 : 450}
-            style={{ transformOrigin: 'top center' }}
+          <ContainerTransition 
+            locationKey={key}
+            type="fade"
+            duration={0.4}
+            disabled={disableAnimations}
           >
-            <Box>
-              <ContentTransition>
-                {children}
-              </ContentTransition>
-            </Box>
-          </Grow>
+            {children}
+          </ContainerTransition>
         )}
       </Container>
     </Box>
