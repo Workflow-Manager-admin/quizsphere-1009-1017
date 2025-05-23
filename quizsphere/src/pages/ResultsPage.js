@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Container,
   Box,
   Typography,
   Paper,
@@ -21,6 +22,7 @@ import {
   TextField,
   Snackbar,
   Alert,
+  IconButton,
   useTheme
 } from '@mui/material';
 import {
@@ -106,9 +108,11 @@ const ResultsPage = () => {
   
   if (loading || !quiz) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
-        <Typography>Loading results...</Typography>
-      </Box>
+      <Container maxWidth="md" sx={{ mt: 12, mb: 8 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
+          <Typography>Loading results...</Typography>
+        </Box>
+      </Container>
     );
   }
   
@@ -134,7 +138,7 @@ const ResultsPage = () => {
   }
   
   return (
-    <Box sx={{ mb: 4 }}>
+    <Container maxWidth="md" sx={{ mt: 12, mb: 8 }}>
       {/* Results header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
@@ -419,7 +423,7 @@ const ResultsPage = () => {
           Results shared successfully!
         </Alert>
       </Snackbar>
-    </Box>
+    </Container>
   );
 };
 
