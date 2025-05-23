@@ -20,6 +20,7 @@ import MainContainer from './components/layout/MainContainer';
 // Import custom hooks and common components
 import useContainerState from './hooks/useContainerState';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import ScrollToTopButton from './components/ui/ScrollToTopButton';
 
 // Import pages
 import HomePage from './pages/HomePage';
@@ -143,6 +144,9 @@ function App() {
             </ErrorBoundary>
             
             <Footer />
+            
+            {/* Scroll to top button */}
+            <ScrollToTopButton />
             
             {/* Global notification system */}
             <Snackbar
