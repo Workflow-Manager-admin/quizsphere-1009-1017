@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Container,
   Box,
   Typography,
   Paper,
@@ -168,11 +167,9 @@ const QuizPage = () => {
   // Loading state
   if (loading || !quiz) {
     return (
-      <Container maxWidth="md" sx={{ mt: 12, mb: 8 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
-          <Typography>Loading quiz...</Typography>
-        </Box>
-      </Container>
+      <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
+        <Typography>Loading quiz...</Typography>
+      </Box>
     );
   }
   
@@ -181,7 +178,7 @@ const QuizPage = () => {
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100;
   
   return (
-    <Container maxWidth="md" sx={{ mt: 12, mb: 8 }}>
+    <Box sx={{ mb: 4 }}>
       {/* Quiz header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
@@ -423,7 +420,7 @@ const QuizPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   );
 };
 
