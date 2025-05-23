@@ -22,6 +22,8 @@ const MainContainer = ({
   sx = {} 
 }) => {
   const theme = useTheme();
+  // We keep useMediaQuery hook for potential future use
+  // eslint-disable-next-line no-unused-vars
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   return (
