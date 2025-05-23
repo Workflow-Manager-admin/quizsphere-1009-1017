@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Container,
   Box,
   Stepper,
   Step,
@@ -649,8 +648,8 @@ const QuizCreator = () => {
   );
   
   return (
-    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
-      <Box sx={{ mb: 4, pt: 4 }}>
+    <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4, pt: 2 }}>
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
           Create Quiz
         </Typography>
@@ -732,7 +731,7 @@ const QuizCreator = () => {
           Quiz created successfully!
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 
