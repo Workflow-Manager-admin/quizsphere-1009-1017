@@ -19,7 +19,8 @@ import {
   Home as HomeIcon, 
   Search as SearchIcon, 
   Add as AddIcon, 
-  QuestionAnswer as QuizIcon
+  QuestionAnswer as QuizIcon,
+  Code as CodeIcon
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -38,7 +39,8 @@ const Header = () => {
     { text: 'Home', path: '/', icon: <HomeIcon /> },
     { text: 'Browse Quizzes', path: '/browse', icon: <SearchIcon /> },
     { text: 'Create Quiz', path: '/create', icon: <AddIcon /> },
-    { text: 'My Quizzes', path: '/my-quizzes', icon: <QuizIcon /> }
+    { text: 'My Quizzes', path: '/my-quizzes', icon: <QuizIcon /> },
+    { text: 'Demo', path: '/demo', icon: <CodeIcon /> }
   ];
 
   const toggleDrawer = (open) => (event) => {
