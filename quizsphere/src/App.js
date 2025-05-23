@@ -28,6 +28,7 @@ import QuizBrowser from './pages/QuizBrowser';
 import QuizCreator from './pages/QuizCreator';
 import QuizPage from './pages/QuizPage';
 import ResultsPage from './pages/ResultsPage';
+import ContainerDemo from './components/demo/ContainerDemo';
 
 // Import context provider
 import { QuizProvider } from './context/QuizContext';
@@ -137,6 +138,7 @@ function App() {
                     <Route path="/quiz/:quizId" element={<QuizPage />} />
                     <Route path="/results/:quizId" element={<ResultsPage />} />
                     <Route path="/my-quizzes" element={<QuizBrowser />} />
+                    <Route path="/demo" element={<ContainerDemo />} />
                     <Route path="*" element={<HomePage />} />
                   </Routes>
                 </Suspense>
