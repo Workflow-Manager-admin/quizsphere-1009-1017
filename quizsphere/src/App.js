@@ -12,6 +12,7 @@ import theme from './styles/QuizStyles';
 // Import layout components
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import MainContainer from './components/layout/MainContainer';
 
 // Import pages
 import HomePage from './pages/HomePage';
@@ -42,7 +43,7 @@ function App() {
           >
             <Header />
             
-            <Box sx={{ flexGrow: 1 }}>
+            <MainContainer>
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/browse" element={<QuizBrowser />} />
@@ -52,7 +53,7 @@ function App() {
                 <Route path="/my-quizzes" element={<QuizBrowser />} />
                 <Route path="*" element={<HomePage />} />
               </Routes>
-            </Box>
+            </MainContainer>
             
             <Footer />
           </Box>
