@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container,
   Box,
   Typography,
   Paper,
@@ -107,11 +106,9 @@ const ResultsPage = () => {
   
   if (loading || !quiz) {
     return (
-      <Container maxWidth="md" sx={{ mt: 12, mb: 8 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
-          <Typography>Loading results...</Typography>
-        </Box>
-      </Container>
+      <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>
+        <Typography>Loading results...</Typography>
+      </Box>
     );
   }
   
@@ -137,7 +134,7 @@ const ResultsPage = () => {
   }
   
   return (
-    <Container maxWidth="md" sx={{ mt: 12, mb: 8 }}>
+    <Box sx={{ mb: 4 }}>
       {/* Results header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
@@ -422,7 +419,7 @@ const ResultsPage = () => {
           Results shared successfully!
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 
