@@ -1,140 +1,63 @@
 import React from 'react';
 import {
   ThemeProvider,
-  createTheme,
   CssBaseline,
-  Typography,
-  Button,
-  Container,
-  Box,
-  AppBar,
-  Toolbar
+  Box
 } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#E87A41', // Kavia orange
-    },
-    background: {
-      default: '#1A1A1A',
-      paper: '#1A1A1A',
-    },
-    text: {
-      primary: '#ffffff',
-    }
-  },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontSize: '3.5rem',
-      fontWeight: 600,
-      lineHeight: 1.2,
-    },
-    subtitle1: {
-      fontSize: '1.1rem',
-      lineHeight: 1.5,
-      color: 'rgba(255, 255, 255, 0.7)',
-    }
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: '4px',
-          padding: '10px 20px',
-          fontSize: '1rem',
-          textTransform: 'none',
-          fontWeight: 500,
-        },
-        containedPrimary: {
-          backgroundColor: '#E87A41',
-          '&:hover': {
-            backgroundColor: '#FF8B4D',
-          },
-        }
-      }
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#1A1A1A',
-          boxShadow: 'none',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        }
-      }
-    }
-  }
-});
+// Import our custom theme
+import theme from './styles/QuizStyles';
 
+// Import layout components
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+
+// Import pages
+import HomePage from './pages/HomePage';
+import QuizBrowser from './pages/QuizBrowser';
+import QuizCreator from './pages/QuizCreator';
+import QuizPage from './pages/QuizPage';
+import ResultsPage from './pages/ResultsPage';
+
+// Import context provider
+import { QuizProvider } from './context/QuizContext';
+
+/**
+ * Main App component - serves as the container for QuizSphere
+ * Sets up routing, theming, and application structure
+ */
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
-      <AppBar position="fixed">
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <Typography
-              variant="h6"
-              sx={{
-                mr: 4,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
-              <span style={{ color: '#E87A41' }}>*</span> KAVIA AI
-            </Typography>
+      <QuizProvider>
+        <Router>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: '100vh',
+            }}
+          >
+            <Header />
+            
+            <Box sx={{ flexGrow: 1 }}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/browse" element={<QuizBrowser />} />
+                <Route path="/create" element={<QuizCreator />} />
+                <Route path="/quiz/:quizId" element={<QuizPage />} />
+                <Route path="/results/:quizId" element={<ResultsPage />} />
+                <Route path="/my-quizzes" element={<QuizBrowser />} />
+                <Route path="*" element={<HomePage />} />
+              </Routes>
+            </Box>
+            
+            <Footer />
           </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ ml: 2 }}
-          >
-            Template Button
-          </Button>
-        </Toolbar>
-      </AppBar>
-
-      <Container maxWidth="md">
-        <Box sx={{
-          pt: 15,
-          pb: 8,
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 3
-        }}>
-          <Typography
-            variant="subtitle1"
-            sx={{ color: '#E87A41', fontWeight: 500 }}
-          >
-            AI Workflow Manager Template
-          </Typography>
-
-          <Typography variant="h1" component="h1">
-            quizsphere
-          </Typography>
-
-          <Typography
-            variant="subtitle1"
-            sx={{ maxWidth: '600px', mb: 2 }}
-          >
-            Start building your application.
-          </Typography>
-
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-          >
-            Button
-          </Button>
-        </Box>
-      </Container>
+        </Router>
+      </QuizProvider>
     </ThemeProvider>
   );
 }
