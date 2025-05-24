@@ -184,7 +184,7 @@ const MainContainer = ({
         
         <Button 
           variant="text" 
-          color="inherit"
+          color="primary"
           onClick={handleBack}
         >
           Go Back
@@ -199,24 +199,24 @@ const MainContainer = ({
       sx={{
         flexGrow: 1,
         width: '100%',
-        // Toolbar height (64px in desktop, 56px in mobile) + additional spacing
         pt: { xs: '76px', sm: '84px' },
         pb: 2,
         transition: 'padding 0.3s ease',
         position: 'relative',
+        borderTop: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
         ...sx
       }}
     >
-      {/* Background pattern if enabled */}
+      {/* Background pattern with increased opacity */}
       {backgroundPattern && (
         <BackgroundPattern 
           type={patternType}
-          opacity={0.05}
+          opacity={0.08}
           aria-hidden="true"
         />
       )}
       
-      {/* Optional back navigation */}
+      {/* Optional back navigation with primary color hover */}
       {showNavigation && (
         <Box 
           sx={{ 
@@ -233,7 +233,8 @@ const MainContainer = ({
               sx={{ 
                 bgcolor: alpha(theme.palette.background.paper, 0.4),
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.background.paper, 0.6),
+                  bgcolor: alpha(theme.palette.primary.main, 0.15),
+                  color: theme.palette.primary.main
                 }
               }}
             >
@@ -254,18 +255,18 @@ const MainContainer = ({
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
+          borderLeft: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+          borderRight: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
           ...(centerContent && {
             justifyContent: 'center',
             alignItems: 'center',
             flex: 1,
             minHeight: 'calc(100vh - 200px)',
           }),
-          // Accessibility improvements
           '&:focus': {
             outline: isFocused ? `2px solid ${theme.palette.primary.main}` : 'none',
             outlineOffset: 2,
           },
-          // Smooth scrolling for the container content
           overflowY: 'visible',
           scrollBehavior: 'smooth',
         }}
