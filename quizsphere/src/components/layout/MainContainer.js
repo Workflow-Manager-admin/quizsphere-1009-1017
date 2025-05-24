@@ -5,14 +5,25 @@ import {
   useTheme, 
   useMediaQuery, 
   Typography,
-  alpha
+  alpha,
+  Button,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import InfoIcon from '@mui/icons-material/Info';
 
 // Import custom UI components
 import ContainerTransition from '../ui/ContainerTransition';
 import LoadingOverlay from '../ui/LoadingOverlay';
+import BackgroundPattern from '../ui/BackgroundPattern';
+
+// Import context
+import { useQuizContext } from '../../context/QuizContext';
+import { generateAnimationKey } from '../../utils/containerUtils';
 
 // PUBLIC_INTERFACE
 /**
@@ -28,6 +39,10 @@ import LoadingOverlay from '../ui/LoadingOverlay';
  * @param {string} props.error - Error message to display (if any)
  * @param {boolean} props.disableAnimations - Whether to disable transition animations
  * @param {boolean} props.backgroundPattern - Whether to show background pattern
+ * @param {string} props.patternType - Pattern type ('dots', 'grid', 'waves')
+ * @param {boolean} props.showNavigation - Whether to show back navigation
+ * @param {Function} props.onRefresh - Function to call when refresh button is clicked
+ * @param {boolean} props.centerContent - Whether to center content vertically
  * @param {Object} props.sx - Additional custom styles to apply to the container
  * @returns {React.ReactElement} The rendered MainContainer component
  */
@@ -39,26 +54,42 @@ const MainContainer = ({
   error = null,
   disableAnimations = false,
   backgroundPattern = false,
+  patternType = 'dots',
+  showNavigation = false,
+  onRefresh = null,
+  centerContent = false,
   sx = {} 
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
+  const navigate = useNavigate();
   const containerRef = useRef(null);
+  
+  // Get global state from quiz context
+  const quizContext = useQuizContext();
+  const globalLoading = quizContext?.loading;
+  const globalError = quizContext?.error;
+  
+  // Use either prop loading/error or global state if available
+  const isLoading = loading || globalLoading;
+  const errorMessage = error || globalError;
   
   // Track whether this is the initial render
   const [isFirstRender, setIsFirstRender] = useState(true);
   // Track when content changes to trigger animations
-  const [key, setKey] = useState(location.pathname);
+  const [key, setKey] = useState(location.pathname + generateAnimationKey());
   // Track container height for smooth transitions
   const [containerHeight, setContainerHeight] = useState('auto');
+  // Track if the container is focused for accessibility
+  const [isFocused, setIsFocused] = useState(false);
   
   // Update key when location changes to trigger animations
   useEffect(() => {
     // Short delay to allow smooth transition
     const timer = setTimeout(() => {
-      setKey(location.pathname);
+      setKey(location.pathname + generateAnimationKey());
     }, 100);
     
     // Scroll to top on route change
@@ -82,31 +113,22 @@ const MainContainer = ({
     }
   }, [children, disableAnimations]);
   
-  // Generate the background pattern styles
-  const getPatternStyles = () => {
-    if (!backgroundPattern) return {};
-    
-    return {
-      backgroundImage: `radial-gradient(${alpha(theme.palette.primary.main, 0.1)} 1px, transparent 1px)`,
-      backgroundSize: '20px 20px',
-      backgroundPosition: '0 0',
-      position: 'relative',
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage: 
-          `linear-gradient(to bottom, ${alpha(theme.palette.background.default, 1)} 0%, 
-          ${alpha(theme.palette.background.default, 0.8)} 20%, 
-          ${alpha(theme.palette.background.default, 0.8)} 80%, 
-          ${alpha(theme.palette.background.default, 1)} 100%)`,
-        pointerEvents: 'none',
-        zIndex: -1,
+  // Handle browser back navigation
+  const handleBack = () => {
+    navigate(-1);
+  };
+  
+  // Handle refresh click
+  const handleRefresh = () => {
+    if (onRefresh) {
+      onRefresh();
+    } else {
+      // Default refresh behavior
+      setKey(generateAnimationKey());
+      if (quizContext && quizContext.clearError) {
+        quizContext.clearError();
       }
-    };
+    }
   };
   
   // Render error state
@@ -116,22 +138,58 @@ const MainContainer = ({
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center',
-        minHeight: '200px',
-        p: 3,
+        minHeight: '250px',
+        p: 4,
         textAlign: 'center',
         flexDirection: 'column',
-        gap: 2,
+        gap: 3,
         bgcolor: alpha(theme.palette.error.main, 0.05),
         borderRadius: 2,
-        border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`
+        border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+        maxWidth: '600px',
+        mx: 'auto',
+        my: 4
       }}
     >
+      <Box 
+        sx={{ 
+          bgcolor: alpha(theme.palette.error.main, 0.1),
+          borderRadius: '50%',
+          p: 2,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <InfoIcon color="error" sx={{ fontSize: 40 }} />
+      </Box>
+      
       <Typography variant="h6" color="error.main" gutterBottom>
         Oops! Something went wrong.
       </Typography>
+      
       <Typography variant="body1" color="text.secondary">
-        {error || "We've encountered an issue loading this content. Please try again."}
+        {errorMessage || "We've encountered an issue loading this content. Please try again."}
       </Typography>
+      
+      <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+        <Button 
+          variant="outlined" 
+          color="primary" 
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+        >
+          Try Again
+        </Button>
+        
+        <Button 
+          variant="text" 
+          color="inherit"
+          onClick={handleBack}
+        >
+          Go Back
+        </Button>
+      </Box>
     </Box>
   );
   
@@ -145,10 +203,46 @@ const MainContainer = ({
         pt: { xs: '76px', sm: '84px' },
         pb: 2,
         transition: 'padding 0.3s ease',
-        ...getPatternStyles(),
+        position: 'relative',
         ...sx
       }}
     >
+      {/* Background pattern if enabled */}
+      {backgroundPattern && (
+        <BackgroundPattern 
+          type={patternType}
+          opacity={0.05}
+          aria-hidden="true"
+        />
+      )}
+      
+      {/* Optional back navigation */}
+      {showNavigation && (
+        <Box 
+          sx={{ 
+            px: { xs: 2, sm: 3, md: 4 },
+            mb: 2, 
+            maxWidth,
+            mx: 'auto'
+          }}
+        >
+          <Tooltip title="Go back">
+            <IconButton 
+              onClick={handleBack}
+              aria-label="Go back"
+              sx={{ 
+                bgcolor: alpha(theme.palette.background.paper, 0.4),
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.background.paper, 0.6),
+                }
+              }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
+      
       <Container
         ref={containerRef}
         maxWidth={maxWidth}
@@ -158,9 +252,18 @@ const MainContainer = ({
           height: !disableAnimations ? containerHeight : '100%',
           transition: !disableAnimations ? 'height 0.3s ease-out' : 'none',
           position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          ...(centerContent && {
+            justifyContent: 'center',
+            alignItems: 'center',
+            flex: 1,
+            minHeight: 'calc(100vh - 200px)',
+          }),
           // Accessibility improvements
           '&:focus': {
-            outline: 'none',
+            outline: isFocused ? `2px solid ${theme.palette.primary.main}` : 'none',
+            outlineOffset: 2,
           },
           // Smooth scrolling for the container content
           overflowY: 'visible',
@@ -170,20 +273,22 @@ const MainContainer = ({
         aria-live="polite"
         role="region"
         aria-label="Main content"
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       >
         {/* Show loading spinner when in loading state */}
         <LoadingOverlay
-          loading={loading}
+          loading={isLoading}
           message="Loading content..."
           type="container"
           transparent={true}
         />
         
         {/* Show error message when there's an error */}
-        {error && renderError()}
+        {errorMessage && renderError()}
         
         {/* Render children with transition if not loading or error */}
-        {!loading && !error && (
+        {!isLoading && !errorMessage && (
           <ContainerTransition 
             locationKey={key}
             type="fade"
@@ -206,6 +311,10 @@ MainContainer.propTypes = {
   error: PropTypes.string,
   disableAnimations: PropTypes.bool,
   backgroundPattern: PropTypes.bool,
+  patternType: PropTypes.oneOf(['dots', 'grid', 'waves']),
+  showNavigation: PropTypes.bool,
+  onRefresh: PropTypes.func,
+  centerContent: PropTypes.bool,
   sx: PropTypes.object
 };
 
