@@ -27,27 +27,20 @@ const mockTheme = createTheme({
 });
 
 // Create stateful mock for useMediaQuery to allow dynamic updates in tests
-let mediaQueryState = {
-  isMobile: false,
-  isTablet: false
-};
-
 // Mock Material UI hooks
-jest.mock('@mui/material', () => ({
-  ...jest.requireActual('@mui/material'),
-  useMediaQuery: jest.fn((query) => {
-    if (query.includes('sm')) return mediaQueryState.isMobile;
-    if (query.includes('md')) return mediaQueryState.isTablet;
-    return false;
-  }),
-  useTheme: jest.fn(() => mockTheme),
+jest.mock('@mui/material/styles/useTheme', () => ({
+  __esModule: true,
+  default: () => mockTheme
 }));
 
-// Helper to update media query state
-const setMediaQueryState = (mobile = false, tablet = false) => {
-  mediaQueryState.isMobile = mobile;
-  mediaQueryState.isTablet = tablet;
-  return mediaQueryState;
+jest.mock('@mui/material', () => ({
+  ...jest.requireActual('@mui/material'),
+  useMediaQuery: jest.fn(() => false)
+}));
+
+// Helper to set media query mock response
+const setMediaQuery = (matches) => {
+  useMediaQuery.mockImplementation(() => matches);
 };
 
 // Mock navigate function
@@ -338,7 +331,7 @@ describe('MainContainer Component', () => {
     });
 
     test('adapts layout for mobile devices', () => {
-      setMediaQueryState(true, false); // Set mobile view
+      setMediaQuery(true); // Set mobile view
       renderWithTheme(<MainContainer showFilters>Mobile Content</MainContainer>);
       
       const container = screen.getByRole('region');
@@ -350,7 +343,7 @@ describe('MainContainer Component', () => {
     });
     
     test('adapts layout for tablet devices', () => {
-      setMediaQueryState(false, true); // Set tablet view
+      setMediaQuery(true); // Set tablet view
       renderWithTheme(<MainContainer showFilters>Tablet Content</MainContainer>);
       
       const container = screen.getByRole('region');
@@ -358,7 +351,7 @@ describe('MainContainer Component', () => {
     });
     
     test('adapts layout for desktop devices', () => {
-      setMediaQueryState(false, false); // Set desktop view
+      setMediaQuery(false); // Set desktop view
       renderWithTheme(<MainContainer showFilters>Desktop Content</MainContainer>);
       
       const container = screen.getByRole('region');
