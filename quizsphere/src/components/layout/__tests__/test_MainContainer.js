@@ -6,38 +6,52 @@ import theme from '../../../styles/QuizStyles';
 import MainContainer from '../MainContainer';
 import { QuizContext } from '../../../context/QuizContext';
 
-// Mock dependencies used by MainContainer
+// Mock dependencies
+// Instead of directly mocking react-router-dom, we'll mock specific components
+const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
   useLocation: () => ({ pathname: '/test' }),
-  useNavigate: () => jest.fn(),
+  useNavigate: () => mockNavigate,
 }));
 
 jest.mock('../../../utils/containerUtils', () => ({
-  ...jest.requireActual('../../../utils/containerUtils'),
   generateAnimationKey: () => 'test-key',
+  getAnimationVariant: jest.requireActual('../../../utils/containerUtils').getAnimationVariant,
+  formatErrorMessage: jest.requireActual('../../../utils/containerUtils').formatErrorMessage,
 }));
 
-jest.mock('../../ui/ContainerTransition', () => ({ children, disabled }) => (
-  <div data-testid="container-transition">
-    {disabled ? 'Transitions disabled' : 'Transitions enabled'}
-    <div>{children}</div>
-  </div>
-));
+// Mock UI components
+jest.mock('../../ui/ContainerTransition', () => {
+  return function MockContainerTransition({ children, disabled }) {
+    return (
+      <div data-testid="container-transition">
+        {disabled ? 'Transitions disabled' : 'Transitions enabled'}
+        <div>{children}</div>
+      </div>
+    );
+  };
+});
 
-jest.mock('../../ui/LoadingOverlay', () => ({ loading, message }) => (
-  loading ? <div data-testid="loading-overlay">{message}</div> : null
-));
+jest.mock('../../ui/LoadingOverlay', () => {
+  return function MockLoadingOverlay({ loading, message }) {
+    return loading ? <div data-testid="loading-overlay">{message}</div> : null;
+  };
+});
 
-jest.mock('../../ui/BackgroundPattern', () => ({ type, opacity }) => (
-  <div data-testid="background-pattern" data-type={type} data-opacity={opacity}></div>
-));
+jest.mock('../../ui/BackgroundPattern', () => {
+  return function MockBackgroundPattern({ type, opacity }) {
+    return (
+      <div data-testid="background-pattern" data-type={type} data-opacity={opacity}></div>
+    );
+  };
+});
 
 // Mock window.scrollTo
 const originalScrollTo = window.scrollTo;
 beforeAll(() => {
   window.scrollTo = jest.fn();
 });
+
 afterAll(() => {
   window.scrollTo = originalScrollTo;
 });
@@ -220,17 +234,12 @@ describe('MainContainer Component', () => {
     });
     
     test('calls navigate when back button is clicked', async () => {
-      // Reset and recreate the mock for this test
-      const navigateMock = jest.fn();
-      jest.spyOn(require('react-router-dom'), 'useNavigate').mockReturnValue(navigateMock);
-      
       const { user } = renderWithContext(<MainContainer showNavigation>Content</MainContainer>);
       
       const backButton = screen.getByLabelText('Go back');
       await user.click(backButton);
       
-      // Since we've mocked useNavigate above, this will be undefined
-      // In a real test, we would expect navigateMock to have been called with -1
+      expect(mockNavigate).toHaveBeenCalledWith(-1);
     });
   });
   
