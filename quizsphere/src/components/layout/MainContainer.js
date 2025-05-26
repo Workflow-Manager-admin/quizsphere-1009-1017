@@ -8,13 +8,22 @@ import {
   alpha,
   Button,
   IconButton,
-  Tooltip
+  Tooltip,
+  Chip,
+  Tabs,
+  Tab,
+  Divider,
+  Paper
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useLocation, useNavigate } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import InfoIcon from '@mui/icons-material/Info';
+import CategoryIcon from '@mui/icons-material/Category';
+import CreateIcon from '@mui/icons-material/Create';
+import QuizIcon from '@mui/icons-material/Quiz';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 // Import custom UI components
 import ContainerTransition from '../ui/ContainerTransition';
@@ -30,6 +39,7 @@ import { generateAnimationKey } from '../../utils/containerUtils';
  * MainContainer component for QuizSphere application
  * Provides consistent layout structure, padding, and responsive behavior across all pages
  * Handles proper spacing below the fixed header, page transitions, and loading states
+ * Supports quiz creation, sharing, and participation features with appropriate layout
  * 
  * @param {Object} props - The component props
  * @param {React.ReactNode} props.children - Child elements to render within the container
@@ -44,6 +54,13 @@ import { generateAnimationKey } from '../../utils/containerUtils';
  * @param {Function} props.onRefresh - Function to call when refresh button is clicked
  * @param {boolean} props.centerContent - Whether to center content vertically
  * @param {Object} props.sx - Additional custom styles to apply to the container
+ * @param {string} props.containerMode - Mode for container display ('browse', 'create', 'participate', 'results')
+ * @param {string} props.activeCategory - Active quiz category filter (if applicable)
+ * @param {string} props.activeDifficulty - Active quiz difficulty filter (if applicable)
+ * @param {boolean} props.showFilters - Whether to show category/difficulty filters
+ * @param {Function} props.onCategoryChange - Function to call when category filter changes
+ * @param {Function} props.onDifficultyChange - Function to call when difficulty filter changes
+ * @param {Object} props.quizData - Current quiz data for participate mode (if applicable)
  * @returns {React.ReactElement} The rendered MainContainer component
  */
 const MainContainer = ({ 
@@ -58,7 +75,14 @@ const MainContainer = ({
   showNavigation = false,
   onRefresh = null,
   centerContent = false,
-  sx = {} 
+  sx = {},
+  containerMode = 'browse',
+  activeCategory = null,
+  activeDifficulty = null,
+  showFilters = false,
+  onCategoryChange = null,
+  onDifficultyChange = null,
+  quizData = null
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -71,10 +95,17 @@ const MainContainer = ({
   const quizContext = useQuizContext();
   const globalLoading = quizContext?.loading;
   const globalError = quizContext?.error;
+  const { categories, difficultyLevels } = quizContext || { 
+    categories: [], 
+    difficultyLevels: [] 
+  };
   
   // Use either prop loading/error or global state if available
   const isLoading = loading || globalLoading;
   const errorMessage = error || globalError;
+  
+  // Track active tab for different container modes
+  const [activeTab, setActiveTab] = useState(0);
   
   // Track whether this is the initial render
   const [isFirstRender, setIsFirstRender] = useState(true);
@@ -131,7 +162,157 @@ const MainContainer = ({
     }
   };
   
-  // Render error state
+  // Handle tab change for different container modes
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+  
+  // Handle category change
+  const handleCategoryChange = (category) => {
+    if (onCategoryChange) {
+      onCategoryChange(category);
+    }
+  };
+  
+  // Handle difficulty change
+  const handleDifficultyChange = (difficulty) => {
+    if (onDifficultyChange) {
+      onDifficultyChange(difficulty);
+    }
+  };
+  
+  // Renders the quiz navigation bar with filters
+  const renderQuizNavigationBar = () => {
+    if (!showFilters) return null;
+    
+    return (
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          mb: 3,
+          bgcolor: alpha(theme.palette.background.paper, 0.7),
+          borderRadius: 2,
+          backdropFilter: 'blur(10px)',
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {/* Section title */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FilterListIcon fontSize="small" color="primary" />
+            <Typography variant="subtitle1" fontWeight="medium">
+              Quiz Filters
+            </Typography>
+          </Box>
+          
+          <Divider />
+          
+          {/* Category filters */}
+          <Box sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Categories
+            </Typography>
+            
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 1,
+              mt: 1 
+            }}>
+              {categories.map((category) => (
+                <Chip
+                  key={category}
+                  label={category}
+                  size="small"
+                  variant={activeCategory === category ? "filled" : "outlined"}
+                  color={activeCategory === category ? "primary" : "default"}
+                  onClick={() => handleCategoryChange(category)}
+                  clickable
+                />
+              ))}
+            </Box>
+          </Box>
+          
+          {/* Difficulty filters */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Difficulty
+            </Typography>
+            
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 1,
+              mt: 1 
+            }}>
+              {difficultyLevels.map((difficulty) => (
+                <Chip
+                  key={difficulty}
+                  label={difficulty}
+                  size="small"
+                  variant={activeDifficulty === difficulty ? "filled" : "outlined"}
+                  color={activeDifficulty === difficulty ? "primary" : "default"}
+                  onClick={() => handleDifficultyChange(difficulty)}
+                  clickable
+                />
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
+    );
+  };
+  
+  // Renders the container mode tabs
+  const renderContainerModeTabs = () => {
+    if (containerMode === 'default') return null;
+    
+    const tabs = [];
+    
+    // Add appropriate tabs based on containerMode
+    if (containerMode === 'browse') {
+      tabs.push(
+        { label: 'All Quizzes', icon: <QuizIcon fontSize="small" /> },
+        { label: 'By Category', icon: <CategoryIcon fontSize="small" /> }
+      );
+    } else if (containerMode === 'create') {
+      tabs.push(
+        { label: 'Basic Info', icon: <InfoIcon fontSize="small" /> },
+        { label: 'Questions', icon: <CreateIcon fontSize="small" /> },
+        { label: 'Review', icon: <QuizIcon fontSize="small" /> }
+      );
+    } else if (containerMode === 'participate') {
+      tabs.push(
+        { label: 'Questions', icon: <QuizIcon fontSize="small" /> },
+        { label: 'Progress', icon: <InfoIcon fontSize="small" /> }
+      );
+    }
+    
+    if (tabs.length === 0) return null;
+    
+    return (
+      <Box sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs 
+          value={activeTab}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="quiz container tabs"
+        >
+          {tabs.map((tab, index) => (
+            <Tab 
+              key={index} 
+              label={tab.label} 
+              icon={tab.icon} 
+              iconPosition="start"
+            />
+          ))}
+        </Tabs>
+      </Box>
+    );
+  };
+  
+  // Render error state with appropriate messaging based on containerMode
   const renderError = () => (
     <Box 
       sx={{ 
@@ -169,7 +350,7 @@ const MainContainer = ({
       </Typography>
       
       <Typography variant="body1" color="text.secondary">
-        {errorMessage || "We've encountered an issue loading this content. Please try again."}
+        {errorMessage || getErrorMessageByMode(containerMode)}
       </Typography>
       
       <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
@@ -192,6 +373,76 @@ const MainContainer = ({
       </Box>
     </Box>
   );
+  
+  // Get appropriate error message based on container mode
+  const getErrorMessageByMode = (mode) => {
+    switch (mode) {
+      case 'browse':
+        return "We couldn't load the quiz list. Please check your connection and try again.";
+      case 'create':
+        return "There was an issue with the quiz creation form. Please try again.";
+      case 'participate':
+        return "We couldn't load this quiz. It may have been removed or is temporarily unavailable.";
+      case 'results':
+        return "We couldn't load your quiz results. Please try again.";
+      default:
+        return "We've encountered an issue loading this content. Please try again.";
+    }
+  };
+  
+  // Render appropriate placeholder content based on container mode and active tab
+  const renderModeContent = () => {
+    // This will be replaced with actual components as they are developed
+    // For now we just render placeholders
+    
+    if (containerMode === 'browse' && activeTab === 1) {
+      return (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Category Browser
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            This will display quizzes grouped by category
+          </Typography>
+        </Box>
+      );
+    }
+    
+    if (containerMode === 'create') {
+      const createSteps = [
+        "Fill in basic quiz information",
+        "Add questions and answers",
+        "Review and publish your quiz"
+      ];
+      
+      return (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Quiz Creator - Step {activeTab + 1}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {createSteps[activeTab]}
+          </Typography>
+        </Box>
+      );
+    }
+    
+    if (containerMode === 'participate') {
+      return (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Quiz Participation
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {activeTab === 0 ? "Answer quiz questions here" : "View your progress"}
+          </Typography>
+        </Box>
+      );
+    }
+    
+    // Default just renders children
+    return null;
+  };
   
   return (
     <Box
@@ -288,6 +539,12 @@ const MainContainer = ({
         {/* Show error message when there's an error */}
         {errorMessage && renderError()}
         
+        {/* Render navigation filters if enabled */}
+        {renderQuizNavigationBar()}
+        
+        {/* Render mode-specific tabs if applicable */}
+        {renderContainerModeTabs()}
+        
         {/* Render children with transition if not loading or error */}
         {!isLoading && !errorMessage && (
           <ContainerTransition 
@@ -296,7 +553,13 @@ const MainContainer = ({
             duration={0.4}
             disabled={disableAnimations}
           >
-            {children}
+            <>
+              {/* Render mode-specific placeholder content if applicable */}
+              {renderModeContent()}
+              
+              {/* Render children */}
+              {children}
+            </>
           </ContainerTransition>
         )}
       </Container>
@@ -316,7 +579,14 @@ MainContainer.propTypes = {
   showNavigation: PropTypes.bool,
   onRefresh: PropTypes.func,
   centerContent: PropTypes.bool,
-  sx: PropTypes.object
+  sx: PropTypes.object,
+  containerMode: PropTypes.oneOf(['default', 'browse', 'create', 'participate', 'results']),
+  activeCategory: PropTypes.string,
+  activeDifficulty: PropTypes.string,
+  showFilters: PropTypes.bool,
+  onCategoryChange: PropTypes.func,
+  onDifficultyChange: PropTypes.func,
+  quizData: PropTypes.object
 };
 
 export default MainContainer;

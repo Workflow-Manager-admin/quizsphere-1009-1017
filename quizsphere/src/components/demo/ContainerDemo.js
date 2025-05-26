@@ -1,251 +1,180 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Grid, 
-  Card, 
-  CardContent, 
-  Switch, 
-  FormGroup,
-  FormControlLabel,
-  Divider,
-  Paper,
-  Tooltip,
-  IconButton,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Slider
-} from '@mui/material';
-import {
-  Refresh as RefreshIcon,
-  ErrorOutline as ErrorIcon,
-  VisibilityOff as VisibilityOffIcon
-} from '@mui/icons-material';
-import FadeInSection from '../ui/FadeInSection';
+import { Box, Typography, Button, Grid, Card, CardContent, ButtonGroup } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import MainContainer from '../layout/MainContainer';
-import PageContainer from '../layout/PageContainer';
+import { useQuizContext } from '../../context/QuizContext';
+import mockQuizData from '../../data/mockQuizData';
 
 /**
- * Demo component for showcasing MainContainer features and animations
- * 
- * Provides controls to test various container features including:
- * - Loading states
- * - Error handling
- * - Animation types
- * - Background patterns
+ * Demo component for showcasing MainContainer features
+ * This component demonstrates the different capabilities and modes of the enhanced MainContainer
  */
 const ContainerDemo = () => {
-  // State for controlling demo features
+  const navigate = useNavigate();
+  const [containerMode, setContainerMode] = useState('default');
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeDifficulty, setActiveDifficulty] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [disableAnimations, setDisableAnimations] = useState(false);
-  const [backgroundPattern, setBackgroundPattern] = useState(true);
-  const [animationType, setAnimationType] = useState('fade');
-  const [animationDuration, setAnimationDuration] = useState(0.4);
   
-  // Toggle loading state
-  const handleToggleLoading = () => {
-    setLoading(prev => !prev);
-    setError(null);
+  // Demo handlers
+  const toggleLoading = () => setLoading(prev => !prev);
+  const toggleError = () => setError(error ? null : "This is a demo error message");
+  const toggleFilters = () => setShowFilters(prev => !prev);
+  
+  // Category and difficulty change handlers
+  const handleCategoryChange = (category) => {
+    setActiveCategory(prev => prev === category ? null : category);
+  };
+  
+  const handleDifficultyChange = (difficulty) => {
+    setActiveDifficulty(prev => prev === difficulty ? null : difficulty);
+  };
+  
+  // Mode button rendering
+  const renderModeButtons = () => {
+    const modes = [
+      { name: 'default', label: 'Standard' },
+      { name: 'browse', label: 'Browse Quizzes' },
+      { name: 'create', label: 'Create Quiz' },
+      { name: 'participate', label: 'Take Quiz' },
+      { name: 'results', label: 'Results' }
+    ];
     
-    // Auto-disable loading after 3 seconds
-    if (!loading) {
-      setTimeout(() => setLoading(false), 3000);
-    }
+    return (
+      <ButtonGroup variant="outlined" sx={{ mb: 3 }}>
+        {modes.map(mode => (
+          <Button
+            key={mode.name}
+            onClick={() => setContainerMode(mode.name)}
+            variant={containerMode === mode.name ? 'contained' : 'outlined'}
+          >
+            {mode.label}
+          </Button>
+        ))}
+      </ButtonGroup>
+    );
   };
   
-  // Toggle error state
-  const handleToggleError = () => {
-    if (error) {
-      setError(null);
-    } else {
-      setError('This is a sample error message for demonstration purposes.');
-      setLoading(false);
-    }
-  };
-  
-  // Reset demo to default state
-  const handleReset = () => {
-    setLoading(false);
-    setError(null);
+  // Feature toggle button rendering
+  const renderFeatureToggles = () => {
+    const features = [
+      { name: 'loading', label: 'Loading', state: loading, action: toggleLoading },
+      { name: 'error', label: 'Error', state: error, action: toggleError },
+      { name: 'filters', label: 'Filters', state: showFilters, action: toggleFilters }
+    ];
+    
+    return (
+      <ButtonGroup variant="outlined" sx={{ mb: 3 }}>
+        {features.map(feature => (
+          <Button
+            key={feature.name}
+            onClick={feature.action}
+            variant={feature.state ? 'contained' : 'outlined'}
+            color={feature.state ? 'primary' : 'inherit'}
+          >
+            {feature.label}
+          </Button>
+        ))}
+      </ButtonGroup>
+    );
   };
   
   return (
     <Box>
-      <PageContainer 
-        title="Container Demo" 
-        subtitle="Showcase of the enhanced MainContainer features including animations, loading states, and error handling."
-        disableAnimation={disableAnimations}
+      <Typography variant="h4" gutterBottom>
+        MainContainer Demo
+      </Typography>
+      <Typography variant="body1" paragraph>
+        This page demonstrates the features of the enhanced MainContainer component.
+        Toggle the different modes and options to see how the container adapts.
+      </Typography>
+      
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Container Modes
+        </Typography>
+        {renderModeButtons()}
+        
+        <Typography variant="h6" gutterBottom>
+          Features
+        </Typography>
+        {renderFeatureToggles()}
+      </Box>
+      
+      <Box
+        sx={{
+          border: '1px dashed grey',
+          borderRadius: 2,
+          p: 2,
+          mb: 4
+        }}
       >
-        {/* Demo controls */}
-        <Paper sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" gutterBottom>Demo Controls</Typography>
-          
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} sm={6} md={3}>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={loading}
-                      onChange={handleToggleLoading}
-                      color="primary"
-                    />
-                  }
-                  label="Toggle Loading State"
-                />
-              </FormGroup>
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={3}>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={!!error}
-                      onChange={handleToggleError}
-                      color="error"
-                    />
-                  }
-                  label="Toggle Error State"
-                />
-              </FormGroup>
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={3}>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={disableAnimations}
-                      onChange={() => setDisableAnimations(prev => !prev)}
-                    />
-                  }
-                  label="Disable Animations"
-                />
-              </FormGroup>
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={3}>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={backgroundPattern}
-                      onChange={() => setBackgroundPattern(prev => !prev)}
-                      color="primary"
-                    />
-                  }
-                  label="Background Pattern"
-                />
-              </FormGroup>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Animation Type</InputLabel>
-                <Select
-                  value={animationType}
-                  label="Animation Type"
-                  onChange={(e) => setAnimationType(e.target.value)}
-                  disabled={disableAnimations}
-                >
-                  <MenuItem value="fade">Fade</MenuItem>
-                  <MenuItem value="slide">Slide</MenuItem>
-                  <MenuItem value="scale">Scale</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <Typography gutterBottom>
-                Animation Duration: {animationDuration}s
-              </Typography>
-              <Slider
-                value={animationDuration}
-                min={0.1}
-                max={2}
-                step={0.1}
-                onChange={(_, value) => setAnimationDuration(value)}
-                valueLabelDisplay="auto"
-                disabled={disableAnimations}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sx={{ textAlign: 'right' }}>
-              <Tooltip title="Reset Demo">
-                <IconButton onClick={handleReset} color="primary">
-                  <RefreshIcon />
-                </IconButton>
-              </Tooltip>
-            </Grid>
-          </Grid>
-        </Paper>
-        
-        <Divider sx={{ my: 4 }} />
-        
-        {/* Demo content */}
-        <Typography variant="h5" gutterBottom>
-          Demo Content
+        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+          Container Preview:
         </Typography>
         
-        <Typography variant="body1" paragraph>
-          This demo showcases the enhanced MainContainer with animated transitions,
-          loading states, and error handling. Try toggling the options above to see
-          different container behaviors.
-        </Typography>
-        
-        <FadeInSection 
-          animation={animationType} 
-          duration={animationDuration} 
-          disabled={disableAnimations}
+        <MainContainer
+          containerMode={containerMode}
+          showFilters={showFilters}
+          activeCategory={activeCategory}
+          activeDifficulty={activeDifficulty}
+          loading={loading}
+          error={error ? error : null}
+          onCategoryChange={handleCategoryChange}
+          onDifficultyChange={handleDifficultyChange}
+          quizData={containerMode === 'participate' ? mockQuizData[0] : null}
+          showNavigation={true}
         >
-          <Grid container spacing={3} sx={{ mt: 2 }}>
-            {[1, 2, 3].map((item) => (
-              <Grid item xs={12} md={4} key={item}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Sample Card {item}
-                    </Typography>
-                    <Typography variant="body2">
-                      This card demonstrates how content is animated within the container.
-                      Different animation types provide different visual experiences.
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </FadeInSection>
-        
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              setLoading(true);
-              setTimeout(() => setLoading(false), 2000);
-            }}
-          >
-            Simulate Loading (2s)
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            sx={{ ml: 2 }}
-            onClick={() => {
-              setError('This is a simulated error message');
-              setTimeout(() => setError(null), 3000);
-            }}
-          >
-            Simulate Error (3s)
-          </Button>
-        </Box>
-      </PageContainer>
+          {containerMode === 'default' && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="h5" gutterBottom>
+                Standard Container Content
+              </Typography>
+              <Typography variant="body1">
+                This is the default container mode without any special features.
+              </Typography>
+            </Box>
+          )}
+          
+          {containerMode === 'browse' && (
+            <Grid container spacing={3}>
+              {mockQuizData.map(quiz => (
+                <Grid item xs={12} sm={6} md={4} key={quiz.id}>
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        {quiz.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {quiz.description}
+                      </Typography>
+                      <Box sx={{ display: 'flex', mt: 2, justifyContent: 'space-between' }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Category: {quiz.category}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Difficulty: {quiz.difficulty}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </MainContainer>
+      </Box>
+      
+      <Button 
+        variant="outlined" 
+        onClick={() => navigate('/')}
+        sx={{ mt: 2 }}
+      >
+        Back to Home
+      </Button>
     </Box>
   );
 };
