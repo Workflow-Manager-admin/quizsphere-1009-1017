@@ -10,27 +10,10 @@ import { createTheme } from '@mui/material/styles';
 // Create a proper Material UI theme
 const mockTheme = createTheme({
   palette: {
-    primary: { 
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
-      contrastText: '#fff'
-    },
-    error: { 
-      main: '#d32f2f',
-      light: '#ef5350',
-      dark: '#c62828',
-      contrastText: '#fff'
-    },
-    background: { 
-      paper: '#fff',
-      default: '#fafafa'
-    },
-    text: { 
-      primary: '#000',
-      secondary: '#666',
-      disabled: '#999'
-    }
+    primary: { main: '#1976d2' },
+    error: { main: '#d32f2f' },
+    background: { paper: '#fff' },
+    text: { secondary: '#666' }
   },
   breakpoints: {
     values: {
@@ -39,45 +22,9 @@ const mockTheme = createTheme({
       md: 900,
       lg: 1200,
       xl: 1536,
-    },
-    up: jest.fn(key => `@media (min-width:${mockTheme.breakpoints.values[key]}px)`),
-    down: jest.fn(key => `@media (max-width:${mockTheme.breakpoints.values[key]}px)`),
-    between: jest.fn((start, end) => 
-      `@media (min-width:${mockTheme.breakpoints.values[start]}px) and (max-width:${mockTheme.breakpoints.values[end]}px)`
-    ),
-  },
-  spacing: jest.fn(factor => `${8 * factor}px`),
-  shape: {
-    borderRadius: 4
-  },
-  transitions: {
-    easing: {
-      easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
-      easeOut: 'cubic-bezier(0.0, 0, 0.2, 1)',
-      easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
-      sharp: 'cubic-bezier(0.4, 0, 0.6, 1)'
-    },
-    duration: {
-      shortest: 150,
-      shorter: 200,
-      short: 250,
-      standard: 300,
-      complex: 375,
-      enteringScreen: 225,
-      leavingScreen: 195
     }
-  },
-  zIndex: {
-    mobileStepper: 1000,
-    fab: 1050,
-    speedDial: 1050,
-    appBar: 1100,
-    drawer: 1200,
-    modal: 1300,
-    snackbar: 1400,
-    tooltip: 1500
   }
-};
+});
 
 // Create stateful mock for useMediaQuery to allow dynamic updates in tests
 let mediaQueryState = {
