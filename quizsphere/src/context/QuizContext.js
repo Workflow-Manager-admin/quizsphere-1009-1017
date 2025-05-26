@@ -20,6 +20,14 @@ const initialState = {
     'Art & Literature',
   ],
   difficultyLevels: ['Easy', 'Medium', 'Hard'],
+  statistics: {
+    quizzesTaken: 0,
+    totalCorrectAnswers: 0,
+    totalQuestions: 0,
+    quizHistory: [],
+    categoryPerformance: {},
+    recentQuizzes: []
+  }
 };
 
 // Reducer function to handle state changes
@@ -53,6 +61,44 @@ const quizReducer = (state, action) => {
         }
       });
       return { ...state, score: newScore };
+    case 'UPDATE_STATISTICS':
+      const { quizResult } = action.payload;
+      const categoryStats = { ...state.statistics.categoryPerformance };
+      const category = quizResult.category;
+      
+      if (!categoryStats[category]) {
+        categoryStats[category] = { 
+          totalQuizzes: 0,
+          totalScore: 0,
+          totalQuestions: 0
+        };
+      }
+      
+      categoryStats[category].totalQuizzes += 1;
+      categoryStats[category].totalScore += quizResult.score;
+      categoryStats[category].totalQuestions += quizResult.questionsCount;
+      
+      // Add to quiz history, limited to last 10 entries
+      const updatedHistory = [quizResult, ...state.statistics.quizHistory].slice(0, 10);
+      
+      // Add to recent quizzes, limited to last 5 entries
+      const updatedRecentQuizzes = [{
+        id: quizResult.quizId,
+        title: quizResult.quizTitle,
+        date: quizResult.date
+      }, ...state.statistics.recentQuizzes].slice(0, 5);
+      
+      return { 
+        ...state, 
+        statistics: {
+          quizzesTaken: state.statistics.quizzesTaken + 1,
+          totalCorrectAnswers: state.statistics.totalCorrectAnswers + quizResult.correctCount,
+          totalQuestions: state.statistics.totalQuestions + quizResult.questionsCount,
+          quizHistory: updatedHistory,
+          categoryPerformance: categoryStats,
+          recentQuizzes: updatedRecentQuizzes
+        }
+      };
     case 'ADD_QUIZ':
       return { ...state, quizzes: [...state.quizzes, action.payload] };
     case 'START_LOADING':
@@ -109,6 +155,15 @@ export const QuizProvider = ({ children }) => {
         type: 'CALCULATE_SCORE', 
         payload: { quiz: state.currentQuiz, answers: state.userAnswers } 
       });
+    },
+    updateStatistics: (quizResult) => {
+      dispatch({
+        type: 'UPDATE_STATISTICS',
+        payload: { quizResult }
+      });
+    },
+    getStatistics: () => {
+      return state.statistics;
     },
     createQuiz: (newQuiz) => {
       dispatch({ type: 'ADD_QUIZ', payload: newQuiz });

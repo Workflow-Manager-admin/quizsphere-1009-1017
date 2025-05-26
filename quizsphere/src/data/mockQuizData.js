@@ -13,31 +13,36 @@ const mockQuizData = [
         id: '1-1',
         text: 'What is the capital of France?',
         options: ['London', 'Berlin', 'Paris', 'Madrid'],
-        correctAnswer: 'Paris'
+        correctAnswer: 'Paris',
+        hint: 'It is known as the City of Light'
       },
       {
         id: '1-2',
         text: 'Which planet is known as the Red Planet?',
         options: ['Venus', 'Mars', 'Jupiter', 'Saturn'],
-        correctAnswer: 'Mars'
+        correctAnswer: 'Mars',
+        hint: 'It has a reddish appearance due to iron oxide (rust) on its surface'
       },
       {
         id: '1-3',
         text: 'Who wrote "Romeo and Juliet"?',
         options: ['Charles Dickens', 'William Shakespeare', 'Jane Austen', 'Mark Twain'],
-        correctAnswer: 'William Shakespeare'
+        correctAnswer: 'William Shakespeare',
+        hint: 'This English playwright also wrote "Hamlet" and "Macbeth"'
       },
       {
         id: '1-4',
         text: 'What is the largest ocean on Earth?',
         options: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'],
-        correctAnswer: 'Pacific Ocean'
+        correctAnswer: 'Pacific Ocean',
+        hint: 'It covers more than 30% of the Earth\'s surface'
       },
       {
         id: '1-5',
         text: 'In what year did World War II end?',
         options: ['1943', '1945', '1947', '1950'],
-        correctAnswer: '1945'
+        correctAnswer: '1945',
+        hint: 'Japan surrendered after the atomic bombings of Hiroshima and Nagasaki'
       }
     ]
   },
@@ -54,13 +59,15 @@ const mockQuizData = [
         id: '2-1',
         text: 'What is the chemical symbol for gold?',
         options: ['Go', 'Gd', 'Au', 'Ag'],
-        correctAnswer: 'Au'
+        correctAnswer: 'Au',
+        hint: 'The symbol comes from the Latin word "aurum"'
       },
       {
         id: '2-2',
         text: 'What is the hardest natural substance on Earth?',
         options: ['Platinum', 'Diamond', 'Titanium', 'Quartz'],
-        correctAnswer: 'Diamond'
+        correctAnswer: 'Diamond',
+        hint: 'It is made of compressed carbon atoms'
       },
       {
         id: '2-3',

@@ -7,12 +7,15 @@ import {
   Card, 
   CardContent, 
   CardMedia, 
-  CardActionArea
+  CardActionArea,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useQuizContext } from '../context/QuizContext';
 import PageContainer from '../components/layout/PageContainer';
 import FadeInSection from '../components/ui/FadeInSection';
+import StatisticsDashboard from '../components/ui/StatisticsDashboard';
 
 // PUBLIC_INTERFACE
 /**
@@ -22,27 +25,48 @@ import FadeInSection from '../components/ui/FadeInSection';
 const HomePage = () => {
   const navigate = useNavigate();
   const { categories } = useQuizContext();
+  const [activeTab, setActiveTab] = React.useState(0);
 
   const handleCategoryClick = (category) => {
     navigate(`/browse?category=${category.toLowerCase().replace(' ', '-')}`);
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
   };
 
   const featuredCategories = categories.slice(0, 6);
 
   return (
     <PageContainer>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 8,
-          mt: 2,
-          pt: 2
-        }}
-      >
+      {/* Tabs for navigation */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          aria-label="home page tabs"
+          centered
+        >
+          <Tab label="Welcome" />
+          <Tab label="My Statistics" />
+        </Tabs>
+      </Box>
+
+      {/* Content based on active tab */}
+      {activeTab === 0 ? (
+        <>
+        {/* Hero Section */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 8,
+            mt: 2,
+            pt: 2
+          }}
+        >
         <Box sx={{ maxWidth: { xs: '100%', md: '50%' }, mb: { xs: 4, md: 0 } }}>
           <Typography
             variant="h2"
@@ -277,6 +301,10 @@ const HomePage = () => {
           </Button>
         </Box>
       </FadeInSection>
+      </>
+      ) : (
+        <StatisticsDashboard />
+      )}
     </PageContainer>
   );
 };

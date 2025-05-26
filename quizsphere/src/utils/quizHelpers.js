@@ -123,6 +123,7 @@ export const formatQuizResults = (quiz, userAnswers, score) => {
   }
   
   return {
+    quizId: quiz.id,
     quizTitle: quiz.title,
     category: quiz.category,
     difficulty: quiz.difficulty,
@@ -140,4 +141,49 @@ export const formatQuizResults = (quiz, userAnswers, score) => {
       isCorrect: userAnswers[index] === question.correctAnswer
     }))
   };
+};
+
+// Calculate average score from quiz history
+export const calculateAverageScore = (quizHistory) => {
+  if (!quizHistory || quizHistory.length === 0) return 0;
+  
+  const totalScore = quizHistory.reduce((sum, quiz) => sum + quiz.percentage, 0);
+  return Math.round(totalScore / quizHistory.length);
+};
+
+// Get performance summary from statistics
+export const getPerformanceSummary = (statistics) => {
+  if (!statistics || statistics.quizzesTaken === 0) {
+    return { averageScore: 0, totalQuizzes: 0, totalCorrect: 0, accuracy: 0 };
+  }
+  
+  const averageScore = statistics.totalQuestions === 0 
+    ? 0 
+    : Math.round((statistics.totalCorrectAnswers / statistics.totalQuestions) * 100);
+    
+  return {
+    averageScore,
+    totalQuizzes: statistics.quizzesTaken,
+    totalCorrect: statistics.totalCorrectAnswers,
+    totalQuestions: statistics.totalQuestions,
+    accuracy: averageScore
+  };
+};
+
+// Get category performance data for visualization
+export const getCategoryPerformanceData = (categoryPerformance) => {
+  if (!categoryPerformance) return [];
+  
+  return Object.entries(categoryPerformance).map(([category, data]) => {
+    const averageScore = data.totalQuestions === 0 
+      ? 0 
+      : Math.round((data.totalScore / data.totalQuestions) * 100);
+      
+    return {
+      category,
+      averageScore,
+      totalQuizzes: data.totalQuizzes,
+      totalQuestions: data.totalQuestions
+    };
+  }).sort((a, b) => b.averageScore - a.averageScore);
 };
