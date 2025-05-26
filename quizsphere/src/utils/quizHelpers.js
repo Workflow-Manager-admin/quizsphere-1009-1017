@@ -26,6 +26,47 @@ export const calculatePercentage = (value, total) => {
 };
 
 /**
+ * Filter quizzes based on category, difficulty and search term
+ * @param {Array} quizzes - Array of quiz objects to filter
+ * @param {Object} filters - Filter criteria
+ * @param {string} filters.category - Category to filter by
+ * @param {string} filters.difficulty - Difficulty level to filter by
+ * @param {string} filters.searchTerm - Search term to filter by
+ * @returns {Array} Filtered quizzes
+ */
+export const filterQuizzes = (quizzes, filters) => {
+  if (!Array.isArray(quizzes)) return [];
+  
+  const { category, difficulty, searchTerm } = filters || {};
+  
+  return quizzes.filter(quiz => {
+    // Category filter
+    if (category && quiz.category !== category) {
+      return false;
+    }
+    
+    // Difficulty filter
+    if (difficulty && quiz.difficulty !== difficulty) {
+      return false;
+    }
+    
+    // Search term filter
+    if (searchTerm && searchTerm.trim() !== '') {
+      const searchLower = searchTerm.toLowerCase();
+      const titleMatch = quiz.title.toLowerCase().includes(searchLower);
+      const descriptionMatch = quiz.description && quiz.description.toLowerCase().includes(searchLower);
+      const categoryMatch = quiz.category.toLowerCase().includes(searchLower);
+      
+      if (!titleMatch && !descriptionMatch && !categoryMatch) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+};
+
+/**
  * Format quiz results into a standardized object
  * @param {Object} quiz - Quiz data object
  * @param {Array} userAnswers - Array of user answers
