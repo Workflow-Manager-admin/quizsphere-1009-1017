@@ -150,6 +150,14 @@ const calculatePerformanceLevel = (score) => {
 };
 
 /**
+ * Generate a unique ID
+ * @returns {string} Unique ID string
+ */
+export const generateId = () => {
+  return `id-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 9)}`;
+};
+
+/**
  * Validate quiz data structure
  * @param {Object} quiz - Quiz data object to validate
  * @returns {boolean} True if valid, false otherwise
@@ -192,4 +200,61 @@ export const parseQuizDuration = (duration) => {
   }
   
   throw new Error('Invalid duration format');
+};
+
+/**
+ * Validate quiz and return validation result with errors
+ * @param {Object} quiz - Quiz data to validate
+ * @returns {Object} Result with isValid flag and any errors
+ */
+export const validateQuiz = (quiz) => {
+  const errors = {};
+  
+  // Check required fields
+  if (!quiz.title || quiz.title.trim() === '') {
+    errors.title = 'Quiz title is required';
+  }
+  
+  if (!quiz.category) {
+    errors.category = 'Category is required';
+  }
+  
+  if (!quiz.difficulty) {
+    errors.difficulty = 'Difficulty level is required';
+  }
+  
+  if (!quiz.timeLimit || quiz.timeLimit < 60) {
+    errors.timeLimit = 'Time limit must be at least 60 seconds';
+  }
+  
+  // Check questions
+  if (!quiz.questions || quiz.questions.length === 0) {
+    errors.questions = 'At least one question is required';
+  } else {
+    // Validate each question
+    quiz.questions.forEach((question, index) => {
+      if (!question.text || question.text.trim() === '') {
+        errors.questions = errors.questions || {};
+        errors.questions[index] = errors.questions[index] || {};
+        errors.questions[index].text = 'Question text is required';
+      }
+      
+      if (!question.options || question.options.length < 2) {
+        errors.questions = errors.questions || {};
+        errors.questions[index] = errors.questions[index] || {};
+        errors.questions[index].options = 'At least two options are required';
+      }
+      
+      if (!question.correctAnswer) {
+        errors.questions = errors.questions || {};
+        errors.questions[index] = errors.questions[index] || {};
+        errors.questions[index].correctAnswer = 'Correct answer must be selected';
+      }
+    });
+  }
+  
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
 };
