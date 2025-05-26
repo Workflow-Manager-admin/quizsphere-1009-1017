@@ -15,21 +15,25 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+// Create theme for testing
+const mockTheme = createTheme({
+  palette: {
+    primary: { main: '#1976d2' },
+    error: { main: '#d32f2f' },
+    background: { paper: '#fff' },
+    text: { secondary: '#666' }
+  }
+});
+
 // Mock Material UI hooks
-jest.mock('@mui/material', () => ({
-  ...jest.requireActual('@mui/material'),
-  useMediaQuery: jest.fn(() => false),
-  useTheme: () => ({
-    palette: {
-      primary: { main: '#1976d2' },
-      error: { main: '#d32f2f' },
-      background: { paper: '#fff' },
-      text: { secondary: '#666' }
-    },
-    breakpoints: {
-      down: () => '@media (max-width:600px)'
-    }
-  })
+jest.mock('@mui/material/useMediaQuery', () => ({
+  __esModule: true,
+  default: jest.fn(() => false)
+}));
+
+jest.mock('@mui/material/styles/useTheme', () => ({
+  __esModule: true,
+  default: jest.fn(() => mockTheme)
 }));
 
 // Mock QuizContext
@@ -87,12 +91,16 @@ afterAll(() => {
 // Helper function to render with common providers
 const renderWithProviders = (ui, { useMediaQueryValue = false } = {}) => {
   // Update media query mock value
-  const useMediaQuery = require('@mui/material').useMediaQuery;
+  const useMediaQuery = require('@mui/material/useMediaQuery').default;
   useMediaQuery.mockImplementation(() => useMediaQueryValue);
 
   return {
     user: userEvent.setup(),
-    ...render(ui)
+    ...render(
+      <ThemeProvider theme={mockTheme}>
+        {ui}
+      </ThemeProvider>
+    )
   };
 };
 
