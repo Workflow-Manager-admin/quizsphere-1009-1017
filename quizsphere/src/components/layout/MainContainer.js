@@ -92,13 +92,17 @@ const MainContainer = ({
   const containerRef = useRef(null);
   
   // Get global state from quiz context
-  const quizContext = useQuizContext();
-  const globalLoading = quizContext?.loading;
-  const globalError = quizContext?.error;
-  const { categories, difficultyLevels } = quizContext || { 
-    categories: [], 
-    difficultyLevels: [] 
-  };
+  const { 
+    loading: globalLoading,
+    error: globalError,
+    categories = [],
+    difficultyLevels = [],
+    currentQuestion = 0,
+    totalQuestions = 0,
+    prevQuestion,
+    nextQuestion,
+    clearError
+  } = useQuizContext() || {};
   
   // Use either prop loading/error or global state if available
   const isLoading = loading || globalLoading;
@@ -156,8 +160,8 @@ const MainContainer = ({
     } else {
       // Default refresh behavior
       setKey(generateAnimationKey());
-      if (quizContext && quizContext.clearError) {
-        quizContext.clearError();
+      if (clearError) {
+        clearError();
       }
     }
   };
