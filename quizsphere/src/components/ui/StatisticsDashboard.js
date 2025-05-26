@@ -5,14 +5,13 @@ import {
   Grid,
   Card,
   CardContent,
-  CardHeader,
-  Divider,
+  Paper,
   LinearProgress,
   List,
   ListItem,
   ListItemText,
   Chip,
-  Paper,
+  Divider,
   useTheme
 } from '@mui/material';
 import { 
@@ -23,7 +22,7 @@ import {
   AccessTime as AccessTimeIcon
 } from '@mui/icons-material';
 import { useQuizContext } from '../../context/QuizContext';
-import { getPerformanceSummary, getCategoryPerformanceData, formatTime } from '../../utils/quizHelpers';
+import { calculateQuizStatistics, formatTime } from '../../utils/quizHelpers';
 
 // PUBLIC_INTERFACE
 /**
@@ -33,8 +32,58 @@ const StatisticsDashboard = () => {
   const theme = useTheme();
   const { statistics } = useQuizContext();
   
-  const performance = getPerformanceSummary(statistics);
-  const categoryPerformance = getCategoryPerformanceData(statistics.categoryPerformance);
+  // Calculate overall performance summary
+  const getPerformanceSummary = () => {
+    if (!statistics || !statistics.quizHistory) {
+      return {
+        averageScore: 0,
+        totalQuizzes: 0,
+        totalCorrect: 0,
+        totalQuestions: 0,
+        accuracy: 0
+      };
+    }
+
+    const totalQuizzes = statistics.quizHistory.length;
+    const totalQuestions = statistics.quizHistory.reduce((sum, quiz) => sum + quiz.questionsCount, 0);
+    const totalCorrect = statistics.quizHistory.reduce((sum, quiz) => sum + quiz.correctCount, 0);
+    const totalScore = statistics.quizHistory.reduce((sum, quiz) => sum + quiz.percentage, 0);
+
+    return {
+      averageScore: totalQuizzes ? Math.round(totalScore / totalQuizzes) : 0,
+      totalQuizzes,
+      totalCorrect,
+      totalQuestions,
+      accuracy: totalQuestions ? Math.round((totalCorrect / totalQuestions) * 100) : 0
+    };
+  };
+
+  // Calculate category-wise performance
+  const getCategoryPerformance = () => {
+    if (!statistics || !statistics.quizHistory) return [];
+
+    const categoryData = {};
+    statistics.quizHistory.forEach(quiz => {
+      if (!categoryData[quiz.category]) {
+        categoryData[quiz.category] = {
+          totalScore: 0,
+          quizCount: 0,
+          category: quiz.category
+        };
+      }
+      categoryData[quiz.category].totalScore += quiz.percentage;
+      categoryData[quiz.category].quizCount += 1;
+    });
+
+    return Object.values(categoryData).map(cat => ({
+      category: cat.category,
+      averageScore: Math.round(cat.totalScore / cat.quizCount),
+      totalQuizzes: cat.quizCount
+    }));
+  };
+
+  const performance = getPerformanceSummary();
+  const categoryPerformance = getCategoryPerformance();
   
   // Format date to be more readable
   const formatDate = (dateString) => {
@@ -62,8 +111,7 @@ const StatisticsDashboard = () => {
           variant="h4" 
           component="h2" 
           gutterBottom 
-          fontWeight="bold"
-          sx={{ mb: 1 }}
+          sx={{ fontWeight: 'bold', mb: 1 }}
         >
           Your Quiz Statistics
         </Typography>
@@ -73,9 +121,9 @@ const StatisticsDashboard = () => {
       </Box>
       
       {/* Performance summary cards */}
-      <Grid container spacing={3} mb={4}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ height: '100%' }}>
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <BarChartIcon color="primary" sx={{ mr: 1 }} />
@@ -83,21 +131,20 @@ const StatisticsDashboard = () => {
                   Average Score
                 </Typography>
               </Box>
-              <Typography variant="h3" component="div" fontWeight="bold">
+              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {performance.averageScore}%
               </Typography>
               <LinearProgress 
                 value={performance.averageScore} 
                 variant="determinate" 
-                sx={{ mt: 1, mb: 0.5 }}
-                color={performance.averageScore >= 70 ? "success" : performance.averageScore >= 40 ? "primary" : "error"}
+                sx={{ mt: 1 }}
               />
             </CardContent>
           </Card>
         </Grid>
         
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ height: '100%' }}>
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <TrendingUpIcon color="primary" sx={{ mr: 1 }} />
@@ -105,7 +152,7 @@ const StatisticsDashboard = () => {
                   Quizzes Taken
                 </Typography>
               </Box>
-              <Typography variant="h3" component="div" fontWeight="bold">
+              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {performance.totalQuizzes}
               </Typography>
             </CardContent>
@@ -113,7 +160,7 @@ const StatisticsDashboard = () => {
         </Grid>
         
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ height: '100%' }}>
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <CheckCircleIcon color="primary" sx={{ mr: 1 }} />
@@ -121,7 +168,7 @@ const StatisticsDashboard = () => {
                   Correct Answers
                 </Typography>
               </Box>
-              <Typography variant="h3" component="div" fontWeight="bold">
+              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {performance.totalCorrect}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -132,7 +179,7 @@ const StatisticsDashboard = () => {
         </Grid>
         
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ height: '100%' }}>
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <QuestionAnswerIcon color="primary" sx={{ mr: 1 }} />
@@ -140,14 +187,13 @@ const StatisticsDashboard = () => {
                   Accuracy
                 </Typography>
               </Box>
-              <Typography variant="h3" component="div" fontWeight="bold">
+              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {performance.accuracy}%
               </Typography>
               <LinearProgress 
                 value={performance.accuracy} 
                 variant="determinate" 
-                sx={{ mt: 1, mb: 0.5 }} 
-                color={performance.accuracy >= 70 ? "success" : performance.accuracy >= 40 ? "primary" : "error"}
+                sx={{ mt: 1 }}
               />
             </CardContent>
           </Card>
@@ -157,7 +203,7 @@ const StatisticsDashboard = () => {
       {/* Category Performance & Recent Quizzes */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={7}>
-          <Paper sx={{ p: 3, height: '100%' }}>
+          <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Category Performance
             </Typography>
@@ -167,19 +213,14 @@ const StatisticsDashboard = () => {
                   <Box key={index} sx={{ mb: 2 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                       <Typography variant="body2">{category.category}</Typography>
-                      <Typography variant="body2" fontWeight="bold">
+                      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                         {category.averageScore}%
                       </Typography>
                     </Box>
                     <LinearProgress 
                       variant="determinate" 
                       value={category.averageScore} 
-                      sx={{ height: 8, borderRadius: 4 }}
-                      color={
-                        category.averageScore >= 80 ? "success" : 
-                        category.averageScore >= 60 ? "primary" : 
-                        category.averageScore >= 40 ? "warning" : "error"
-                      }
+                      sx={{ height: 8, borderRadius: 1 }}
                     />
                     <Typography variant="caption" color="text.secondary">
                       {category.totalQuizzes} {category.totalQuizzes === 1 ? 'quiz' : 'quizzes'} taken
@@ -198,43 +239,36 @@ const StatisticsDashboard = () => {
         </Grid>
         
         <Grid item xs={12} md={5}>
-          <Paper sx={{ p: 3, height: '100%' }}>
+          <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Recent Quizzes
             </Typography>
             {statistics.quizHistory && statistics.quizHistory.length > 0 ? (
-              <List disablePadding>
+              <List>
                 {statistics.quizHistory.slice(0, 5).map((quiz, index) => (
                   <React.Fragment key={index}>
-                    {index > 0 && <Divider component="li" />}
-                    <ListItem alignItems="flex-start" sx={{ px: 0 }}>
+                    {index > 0 && <Divider />}
+                    <ListItem>
                       <ListItemText
                         primary={
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="body1" component="div" fontWeight="medium">
+                            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                               {quiz.quizTitle}
                             </Typography>
                             <Chip 
                               label={`${quiz.percentage}%`} 
                               size="small"
-                              sx={{ 
-                                bgcolor: getScoreColor(quiz.percentage),
-                                color: 'white'
-                              }} 
+                              sx={{ bgcolor: getScoreColor(quiz.percentage), color: 'white' }}
                             />
                           </Box>
                         }
                         secondary={
                           <Box sx={{ mt: 0.5 }}>
-                            <Typography
-                              component="span"
-                              variant="body2"
-                              color="text.secondary"
-                            >
+                            <Typography variant="body2" color="text.secondary">
                               {quiz.category} • {quiz.difficulty} • {quiz.correctCount}/{quiz.questionsCount} correct
                             </Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                              <AccessTimeIcon sx={{ fontSize: '0.875rem', color: 'text.disabled', mr: 0.5 }} />
+                              <AccessTimeIcon sx={{ fontSize: '0.875rem', mr: 0.5, color: 'text.disabled' }} />
                               <Typography variant="caption" color="text.disabled">
                                 {formatDate(quiz.date)}
                               </Typography>

@@ -38,7 +38,11 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
   
   useEffect(() => {
-    window.scrollTo(0, 0);
+    try {
+      window.scrollTo(0, 0);
+    } catch (error) {
+      console.error('Error scrolling to top:', error);
+    }
   }, [pathname]);
   
   return null;

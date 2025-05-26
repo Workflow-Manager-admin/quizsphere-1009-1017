@@ -151,3 +151,33 @@ export const formatErrorMessage = (error) => {
 export const generateAnimationKey = () => {
   return `${Date.now().toString(36)}${Math.random().toString(36).substring(2, 9)}`;
 };
+
+// Safe window scroll function that works in test environments
+export const safeScrollTo = (options = {}) => {
+  try {
+    window.scrollTo(options);
+  } catch (error) {
+    console.error('Error during scroll:', error);
+  }
+};
+
+// Safe timeout function that works in test environments
+export const safeTimeout = (callback, delay) => {
+  try {
+    return setTimeout(callback, delay);
+  } catch (error) {
+    console.error('Error setting timeout:', error);
+    return null;
+  }
+};
+
+// Clear timeout safely
+export const safeClearTimeout = (timeoutId) => {
+  if (timeoutId) {
+    try {
+      clearTimeout(timeoutId);
+    } catch (error) {
+      console.error('Error clearing timeout:', error);
+    }
+  }
+};
