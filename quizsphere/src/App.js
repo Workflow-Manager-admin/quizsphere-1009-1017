@@ -31,7 +31,7 @@ import ResultsPage from './pages/ResultsPage';
 import ContainerDemo from './components/demo/ContainerDemo';
 
 // Import context provider
-import { QuizProvider } from './context/QuizContext';
+import QuizProvider from './context/QuizContext';
 
 // ScrollToTop component to handle scroll restoration
 const ScrollToTop = () => {
