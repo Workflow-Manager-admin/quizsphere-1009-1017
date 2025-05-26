@@ -380,22 +380,77 @@ describe('MainContainer Component', () => {
     });
   });
 
-  // Responsive behavior tests
+  // Enhanced responsive behavior tests
   describe('Responsive Behavior', () => {
-    test('handles mobile view', () => {
-      useMediaQuery.mockReturnValue(true); // Simulate mobile viewport
-      renderWithTheme(<MainContainer>Mobile Content</MainContainer>);
+    beforeEach(() => {
+      // Reset media query state before each test
+      setMediaQueryState(false, false);
+    });
+
+    test('adapts layout for mobile devices', () => {
+      setMediaQueryState(true, false); // Set mobile view
+      renderWithTheme(<MainContainer showFilters>Mobile Content</MainContainer>);
       
       const container = screen.getByRole('region');
-      expect(container).toBeInTheDocument();
+      expect(container).toHaveStyle({ padding: mockTheme.spacing(2) });
+      
+      // Verify mobile-specific UI adjustments
+      const filterSection = screen.getByText('Quiz Filters').closest('div');
+      expect(filterSection).toHaveStyle({ 
+        padding: mockTheme.spacing(2)
+      });
     });
     
-    test('handles desktop view', () => {
-      useMediaQuery.mockReturnValue(false); // Simulate desktop viewport
-      renderWithTheme(<MainContainer>Desktop Content</MainContainer>);
+    test('adapts layout for tablet devices', () => {
+      setMediaQueryState(false, true); // Set tablet view
+      renderWithTheme(<MainContainer showFilters>Tablet Content</MainContainer>);
       
       const container = screen.getByRole('region');
-      expect(container).toBeInTheDocument();
+      expect(container).toHaveStyle({ padding: mockTheme.spacing(3) });
+    });
+    
+    test('adapts layout for desktop devices', () => {
+      setMediaQueryState(false, false); // Set desktop view
+      renderWithTheme(<MainContainer showFilters>Desktop Content</MainContainer>);
+      
+      const container = screen.getByRole('region');
+      expect(container).toHaveStyle({ padding: mockTheme.spacing(4) });
+    });
+
+    test('handles responsive navigation display', () => {
+      // Test mobile view
+      setMediaQueryState(true, false);
+      const { rerender } = renderWithTheme(
+        <MainContainer showNavigation>Content</MainContainer>
+      );
+      
+      let backButton = screen.getByLabelText('Go back');
+      expect(backButton).toHaveStyle({ marginLeft: mockTheme.spacing(2) });
+
+      // Test desktop view
+      setMediaQueryState(false, false);
+      rerender(<MainContainer showNavigation>Content</MainContainer>);
+      
+      backButton = screen.getByLabelText('Go back');
+      expect(backButton).toHaveStyle({ marginLeft: mockTheme.spacing(4) });
+    });
+
+    test('adjusts filter layout responsively', () => {
+      // Test mobile view
+      setMediaQueryState(true, false);
+      const { rerender } = renderWithTheme(
+        <MainContainer showFilters>Content</MainContainer>
+      );
+      
+      let filterContainer = screen.getByText('Quiz Filters').closest('div');
+      expect(filterContainer).toHaveStyle({ flexDirection: 'column' });
+
+      // Test desktop view
+      setMediaQueryState(false, false);
+      rerender(<MainContainer showFilters>Content</MainContainer>);
+      
+      filterContainer = screen.getByText('Quiz Filters').closest('div');
+      expect(filterContainer).toHaveStyle({ flexDirection: 'row' });
     });
   });
 
