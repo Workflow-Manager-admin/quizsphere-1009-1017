@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Container, 
   Box, 
@@ -148,9 +148,15 @@ const MainContainer = ({
     }
   }, [children, disableAnimations]);
   
-  // Handle browser back navigation
+  // Handle browser back navigation with additional safety checks
   const handleBack = () => {
-    navigate(-1);
+    // Check if we can go back in history
+    if (window.history && window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // Fallback to home if there's nowhere to go back to
+      navigate('/');
+    }
   };
   
   // Handle refresh click
@@ -169,6 +175,20 @@ const MainContainer = ({
   // Handle tab change for different container modes
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
+    
+    // Ensure focus is managed appropriately when changing tabs
+    // This improves keyboard navigation accessibility
+    if (event.type === 'keydown') {
+      const timer = setTimeout(() => {
+        const tabPanel = containerRef.current?.querySelector('[role="tabpanel"]');
+        if (tabPanel) {
+          tabPanel.setAttribute('tabindex', '-1');
+          tabPanel.focus();
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
   };
   
   // Handle category change
@@ -189,6 +209,7 @@ const MainContainer = ({
   const renderQuizNavigationBar = () => {
     if (!showFilters) return null;
     
+    // Create the filter UI
     return (
       <Paper
         elevation={0}
@@ -212,8 +233,8 @@ const MainContainer = ({
           <Divider />
           
           {/* Category filters */}
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+          <Box sx={{ mt: 1 }} role="region" aria-label="Category filters">
+            <Typography variant="body2" color="text.secondary" gutterBottom id="category-filter-label">
               Categories
             </Typography>
             
@@ -222,7 +243,9 @@ const MainContainer = ({
               flexWrap: 'wrap', 
               gap: 1,
               mt: 1 
-            }}>
+            }}
+            role="group"
+            aria-labelledby="category-filter-label">
               {categories.map((category) => (
                 <Chip
                   key={category}
@@ -232,14 +255,16 @@ const MainContainer = ({
                   color={activeCategory === category ? "primary" : "default"}
                   onClick={() => handleCategoryChange(category)}
                   clickable
+                  aria-pressed={activeCategory === category}
+                  role="button"
                 />
               ))}
             </Box>
           </Box>
           
           {/* Difficulty filters */}
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+          <Box sx={{ mt: 2 }} role="region" aria-label="Difficulty filters">
+            <Typography variant="body2" color="text.secondary" gutterBottom id="difficulty-filter-label">
               Difficulty
             </Typography>
             
@@ -248,7 +273,9 @@ const MainContainer = ({
               flexWrap: 'wrap', 
               gap: 1,
               mt: 1 
-            }}>
+            }}
+            role="group"
+            aria-labelledby="difficulty-filter-label">
               {difficultyLevels.map((difficulty) => (
                 <Chip
                   key={difficulty}
@@ -258,6 +285,8 @@ const MainContainer = ({
                   color={activeDifficulty === difficulty ? "primary" : "default"}
                   onClick={() => handleDifficultyChange(difficulty)}
                   clickable
+                  aria-pressed={activeDifficulty === difficulty}
+                  role="button"
                 />
               ))}
             </Box>
@@ -392,6 +421,12 @@ const MainContainer = ({
       default:
         return "We've encountered an issue loading this content. Please try again.";
     }
+  };
+  
+  // Helper function to format error messages
+  const formatErrorMessage = (error) => {
+    if (!error) return null;
+    return typeof error === 'string' ? error : String(error);
   };
   
   // Render appropriate placeholder content based on container mode and active tab
