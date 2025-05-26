@@ -479,6 +479,115 @@ const MainContainer = ({
       );
     }
     
+    // Default mode: showing all three main sections of QuizSphere
+    if (containerMode === 'default') {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, my: 3 }}>
+          {/* Quiz Creation Section */}
+          <Paper 
+            elevation={2}
+            sx={{ 
+              p: 4,
+              borderRadius: 2,
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+              backgroundColor: alpha(theme.palette.background.paper, 0.8)
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <CreateIcon color="primary" />
+              <Typography variant="h5" color="primary" fontWeight="bold">
+                Quiz Creation
+              </Typography>
+            </Box>
+            <Divider sx={{ mb: 3 }} />
+            <Typography variant="body1" paragraph>
+              Create your own custom quizzes tailored to any subject or difficulty level. Add multiple choice questions, 
+              true/false questions, and more. Set time limits and customize the quiz appearance.
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2 }}>
+              <Button 
+                variant="outlined" 
+                color="primary"
+                startIcon={<CreateIcon />}
+                component="a"
+                href="/create"
+              >
+                Create a Quiz
+              </Button>
+            </Box>
+          </Paper>
+
+          {/* Quiz Participation Section */}
+          <Paper 
+            elevation={2}
+            sx={{ 
+              p: 4,
+              borderRadius: 2,
+              border: `1px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
+              backgroundColor: alpha(theme.palette.background.paper, 0.8)
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <QuizIcon color="secondary" />
+              <Typography variant="h5" color="secondary" fontWeight="bold">
+                Participate in a Quiz
+              </Typography>
+            </Box>
+            <Divider sx={{ mb: 3 }} />
+            <Typography variant="body1" paragraph>
+              Browse through a wide variety of quizzes across different categories and difficulty levels. 
+              Test your knowledge, challenge yourself with timed quizzes, and track your progress over time.
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2 }}>
+              <Button 
+                variant="outlined" 
+                color="secondary"
+                startIcon={<QuizIcon />}
+                component="a"
+                href="/browse"
+              >
+                Find Quizzes
+              </Button>
+            </Box>
+          </Paper>
+
+          {/* Quiz Sharing Section */}
+          <Paper 
+            elevation={2}
+            sx={{ 
+              p: 4,
+              borderRadius: 2,
+              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+              backgroundColor: alpha(theme.palette.background.paper, 0.8)
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <CategoryIcon color="info" />
+              <Typography variant="h5" color="info" fontWeight="bold">
+                Share a Quiz
+              </Typography>
+            </Box>
+            <Divider sx={{ mb: 3 }} />
+            <Typography variant="body1" paragraph>
+              Share your quizzes with friends, classmates, or students. Generate unique quiz links or QR codes,
+              track participation, and review results. Perfect for educators, trainers, or just for fun.
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2 }}>
+              <Button 
+                variant="outlined" 
+                color="info"
+                startIcon={<CategoryIcon />}
+                component="a"
+                href="/my-quizzes"
+              >
+                My Quizzes
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
+      );
+    }
+    
     // Default just renders children
     return null;
   };
