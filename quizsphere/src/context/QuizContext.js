@@ -1,12 +1,21 @@
-import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
+// Only import what we're actually using
+import { createContext, useContext } from 'react';
 
-// [Previous initialState and ActionTypes remain the same...]
+// Initial state for the quiz context
+const initialState = {
+  // [Previous initialState implementation remains the same...]
+};
+
+// Action Types
+const ActionTypes = {
+  // [Previous ActionTypes implementation remains the same...]
+};
 
 // Create the context
-export const QuizContext = createContext();
+const QuizContext = createContext(initialState);
 
 // Create a custom hook for using the quiz context
-export const useQuizContext = () => {
+const useQuizContext = () => {
   const context = useContext(QuizContext);
   if (!context) {
     throw new Error('useQuizContext must be used within a QuizProvider');
@@ -14,20 +23,16 @@ export const useQuizContext = () => {
   return context;
 };
 
-// Create the provider component
-export const QuizProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(quizReducer, initialState);
-  
-  // [Previous implementation remains the same...]
-  
-  const value = {
-    ...state,
-    ...actions,
-  };
-  
-  return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;
+// Export everything that needs to be available
+export { 
+  QuizContext,
+  useQuizContext,
+  ActionTypes,
+  initialState 
 };
 
-// Make sure we export everything needed
-export { ActionTypes, initialState };
+// Also export the provider directly from the context
+export const QuizProvider = QuizContext.Provider;
+
+// Default export
 export default QuizProvider;
