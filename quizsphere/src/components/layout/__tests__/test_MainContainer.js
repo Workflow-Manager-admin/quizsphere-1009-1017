@@ -4,15 +4,34 @@ import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material';
 import theme from '../../../styles/QuizStyles';
 import MainContainer from '../MainContainer';
-import { QuizContext } from '../../../context/QuizContext';
 
-// Mock dependencies
-// Instead of directly mocking react-router-dom, we'll mock specific components
+// Mock navigate function
 const mockNavigate = jest.fn();
+
+// Mock needed modules before importing them
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: '/test' }),
   useNavigate: () => mockNavigate,
 }));
+
+// Mock QuizContext before importing it
+jest.mock('../../../context/QuizContext', () => ({
+  QuizContext: {
+    Provider: ({ children, value }) => (
+      <div data-testid="quiz-context-provider">{children}</div>
+    )
+  },
+  useQuizContext: () => ({
+    loading: false,
+    error: null,
+    categories: ['Science', 'History', 'Sports'],
+    difficultyLevels: ['Easy', 'Medium', 'Hard'],
+    clearError: jest.fn(),
+  }),
+}));
+
+// Import the mocked QuizContext
+import { QuizContext } from '../../../context/QuizContext';
 
 jest.mock('../../../utils/containerUtils', () => ({
   generateAnimationKey: () => 'test-key',
