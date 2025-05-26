@@ -140,8 +140,8 @@ const QuizContainer = ({
       setIsSubmitting(true);
       
       await executeWithLoading(async () => {
-        // Calculate score
-        const score = calculateScore();
+        // Calculate score with fallback
+        const score = calculateScore ? calculateScore() : 0;
         
         // Mark as submitted
         setSubmitted(true);

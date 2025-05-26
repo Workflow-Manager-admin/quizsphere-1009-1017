@@ -244,6 +244,18 @@ const QuizProvider = ({ children }) => {
     dispatch({ type: ActionTypes.EXIT_REVIEW_MODE });
   }, []);
   
+  // Calculate score based on correct answers
+  const calculateScore = useCallback(() => {
+    if (!state.quizData || !state.userAnswers) return 0;
+    
+    const correctAnswers = Object.entries(state.userAnswers).reduce((count, [questionIndex, answer]) => {
+      const question = state.quizData.questions[parseInt(questionIndex)];
+      return question.correctAnswer === answer ? count + 1 : count;
+    }, 0);
+    
+    return (correctAnswers / state.quizData.questions.length) * 100;
+  }, [state.quizData, state.userAnswers]);
+
   // Combine state and actions into context value
   const value = {
     ...state,
@@ -260,7 +272,8 @@ const QuizProvider = ({ children }) => {
     setError,
     clearError,
     enterReviewMode,
-    exitReviewMode
+    exitReviewMode,
+    calculateScore
   };
   
   return (
