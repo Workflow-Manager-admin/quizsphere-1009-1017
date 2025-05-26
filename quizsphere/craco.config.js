@@ -1,17 +1,13 @@
 module.exports = {
-  babel: {
-    presets: [
-      ['@babel/preset-env', { modules: false }],
-      ['@babel/preset-react', { runtime: 'automatic' }],
-    ],
-    plugins: [
-      '@babel/plugin-transform-runtime',
-    ],
+  webpack: {
+    configure: {
+      devtool: false
+    }
   },
   jest: {
     configure: {
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
     },
-  },
+  }
 };
