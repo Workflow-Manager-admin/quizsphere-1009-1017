@@ -1,189 +1,154 @@
 /**
- * Utility functions for working with quizzes in the application
+ * Format a time value in seconds to a display string
+ * @param {number} seconds - Time in seconds
+ * @returns {string} Formatted time string (MM:SS)
  */
-
-// Shuffle an array using Fisher-Yates algorithm
-export const shuffleArray = (array) => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
-// Format time from seconds to minutes and seconds
 export const formatTime = (seconds) => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-};
-
-// Calculate percentage score
-export const calculatePercentage = (score, total) => {
-  return Math.round((score / total) * 100);
-};
-
-// Get difficulty color
-export const getDifficultyColor = (difficulty) => {
-  switch (difficulty.toLowerCase()) {
-    case 'easy':
-      return '#4CAF50'; // green
-    case 'medium':
-      return '#FF9800'; // orange
-    case 'hard':
-      return '#F44336'; // red
-    default:
-      return '#9E9E9E'; // grey
+  if (!Number.isInteger(seconds) || seconds < 0) {
+    return '00:00';
   }
-};
-
-// Filter quizzes by category and/or difficulty
-export const filterQuizzes = (quizzes, { category, difficulty, searchTerm }) => {
-  return quizzes.filter(quiz => {
-    const categoryMatch = !category || quiz.category === category;
-    const difficultyMatch = !difficulty || quiz.difficulty === difficulty;
-    const searchMatch = !searchTerm || 
-      quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quiz.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return categoryMatch && difficultyMatch && searchMatch;
-  });
-};
-
-// Generate a unique ID for new quizzes or questions
-export const generateId = () => {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
-};
-
-// Validate a quiz object
-export const validateQuiz = (quiz) => {
-  const errors = {};
-
-  if (!quiz.title || quiz.title.trim() === '') {
-    errors.title = 'Quiz title is required';
-  }
-
-  if (!quiz.category) {
-    errors.category = 'Category is required';
-  }
-
-  if (!quiz.difficulty) {
-    errors.difficulty = 'Difficulty level is required';
-  }
-
-  if (!quiz.questions || quiz.questions.length === 0) {
-    errors.questions = 'At least one question is required';
-  } else {
-    const questionErrors = [];
-    quiz.questions.forEach((question, index) => {
-      const qErrors = {};
-      
-      if (!question.text || question.text.trim() === '') {
-        qErrors.text = 'Question text is required';
-      }
-      
-      if (!question.options || question.options.length < 2) {
-        qErrors.options = 'At least two options are required';
-      }
-      
-      if (!question.correctAnswer) {
-        qErrors.correctAnswer = 'Correct answer must be selected';
-      }
-      
-      if (Object.keys(qErrors).length > 0) {
-        questionErrors[index] = qErrors;
-      }
-    });
-    
-    if (questionErrors.length > 0) {
-      errors.questionErrors = questionErrors;
-    }
-  }
-
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors
-  };
-};
-
-// Format quiz results for display or sharing
-export const formatQuizResults = (quiz, userAnswers, score) => {
-  const percentage = calculatePercentage(score, quiz.questions.length);
-  const correctCount = score;
-  const incorrectCount = quiz.questions.length - score;
   
-  let performance = 'Poor';
-  if (percentage >= 80) {
-    performance = 'Excellent';
-  } else if (percentage >= 60) {
-    performance = 'Good';
-  } else if (percentage >= 40) {
-    performance = 'Fair';
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+/**
+ * Calculate percentage
+ * @param {number} value - Current value
+ * @param {number} total - Total value
+ * @returns {number} Percentage (0-100)
+ */
+export const calculatePercentage = (value, total) => {
+  if (total <= 0) return 0;
+  return Math.round((value / total) * 100);
+};
+
+/**
+ * Format quiz results into a standardized object
+ * @param {Object} quiz - Quiz data object
+ * @param {Array} userAnswers - Array of user answers
+ * @param {number} correctCount - Number of correct answers
+ * @returns {Object} Formatted quiz results
+ */
+export const formatQuizResults = (quiz, userAnswers, correctCount) => {
+  if (!quiz || !Array.isArray(userAnswers)) {
+    throw new Error('Invalid quiz data or user answers');
   }
+  
+  const totalQuestions = quiz.questions.length;
+  const score = calculatePercentage(correctCount, totalQuestions);
   
   return {
     quizId: quiz.id,
-    quizTitle: quiz.title,
-    category: quiz.category,
-    difficulty: quiz.difficulty,
-    questionsCount: quiz.questions.length,
-    correctCount,
-    incorrectCount,
+    title: quiz.title,
+    totalQuestions,
+    correctAnswers: correctCount,
+    incorrectAnswers: totalQuestions - correctCount,
     score,
-    percentage,
-    performance,
-    date: new Date().toISOString(),
-    details: quiz.questions.map((question, index) => ({
-      questionText: question.text,
-      userAnswer: userAnswers[index] || 'Not answered',
-      correctAnswer: question.correctAnswer,
-      isCorrect: userAnswers[index] === question.correctAnswer
+    timeTaken: quiz.timeLimit ? quiz.timeLimit - quiz.timeRemaining : null,
+    completedAt: new Date().toISOString(),
+    answers: userAnswers.map((answer, index) => ({
+      questionIndex: index,
+      question: quiz.questions[index].text,
+      userAnswer: answer,
+      correctAnswer: quiz.questions[index].correctAnswer,
+      isCorrect: answer === quiz.questions[index].correctAnswer
     }))
   };
 };
 
-// Calculate average score from quiz history
-export const calculateAverageScore = (quizHistory) => {
-  if (!quizHistory || quizHistory.length === 0) return 0;
+/**
+ * Get difficulty level color
+ * @param {string} difficulty - Difficulty level ('Easy', 'Medium', 'Hard')
+ * @returns {string} Color code for the difficulty level
+ */
+export const getDifficultyColor = (difficulty) => {
+  const colors = {
+    Easy: '#4CAF50',    // Green
+    Medium: '#FF9800',  // Orange
+    Hard: '#F44336'     // Red
+  };
   
-  const totalScore = quizHistory.reduce((sum, quiz) => sum + quiz.percentage, 0);
-  return Math.round(totalScore / quizHistory.length);
+  return colors[difficulty] || '#757575'; // Default gray
 };
 
-// Get performance summary from statistics
-export const getPerformanceSummary = (statistics) => {
-  if (!statistics || statistics.quizzesTaken === 0) {
-    return { averageScore: 0, totalQuizzes: 0, totalCorrect: 0, accuracy: 0 };
+/**
+ * Calculate quiz statistics
+ * @param {Object} results - Quiz results object
+ * @returns {Object} Quiz statistics
+ */
+export const calculateQuizStatistics = (results) => {
+  if (!results || !results.answers) {
+    throw new Error('Invalid results object');
   }
   
-  const averageScore = statistics.totalQuestions === 0 
-    ? 0 
-    : Math.round((statistics.totalCorrectAnswers / statistics.totalQuestions) * 100);
-    
+  const totalQuestions = results.answers.length;
+  const correctAnswers = results.answers.filter(a => a.isCorrect).length;
+  
   return {
-    averageScore,
-    totalQuizzes: statistics.quizzesTaken,
-    totalCorrect: statistics.totalCorrectAnswers,
-    totalQuestions: statistics.totalQuestions,
-    accuracy: averageScore
+    accuracy: calculatePercentage(correctAnswers, totalQuestions),
+    timePerQuestion: results.timeTaken ? Math.round(results.timeTaken / totalQuestions) : null,
+    score: results.score,
+    performance: calculatePerformanceLevel(results.score)
   };
 };
 
-// Get category performance data for visualization
-export const getCategoryPerformanceData = (categoryPerformance) => {
-  if (!categoryPerformance) return [];
+/**
+ * Calculate performance level based on score
+ * @param {number} score - Quiz score (0-100)
+ * @returns {string} Performance level description
+ */
+const calculatePerformanceLevel = (score) => {
+  if (score >= 90) return 'Excellent';
+  if (score >= 75) return 'Good';
+  if (score >= 60) return 'Satisfactory';
+  if (score >= 40) return 'Needs Improvement';
+  return 'Poor';
+};
+
+/**
+ * Validate quiz data structure
+ * @param {Object} quiz - Quiz data object to validate
+ * @returns {boolean} True if valid, false otherwise
+ */
+export const validateQuizData = (quiz) => {
+  if (!quiz || typeof quiz !== 'object') return false;
   
-  return Object.entries(categoryPerformance).map(([category, data]) => {
-    const averageScore = data.totalQuestions === 0 
-      ? 0 
-      : Math.round((data.totalScore / data.totalQuestions) * 100);
-      
-    return {
-      category,
-      averageScore,
-      totalQuizzes: data.totalQuizzes,
-      totalQuestions: data.totalQuestions
-    };
-  }).sort((a, b) => b.averageScore - a.averageScore);
+  const requiredFields = ['id', 'title', 'questions'];
+  if (!requiredFields.every(field => field in quiz)) return false;
+  
+  if (!Array.isArray(quiz.questions) || quiz.questions.length === 0) return false;
+  
+  const validQuestion = (q) => (
+    q &&
+    typeof q === 'object' &&
+    'text' in q &&
+    'correctAnswer' in q &&
+    Array.isArray(q.options) &&
+    q.options.length > 0
+  );
+  
+  return quiz.questions.every(validQuestion);
+};
+
+/**
+ * Parse quiz duration into seconds
+ * @param {number|string} duration - Duration in minutes or "MM:SS" format
+ * @returns {number} Duration in seconds
+ */
+export const parseQuizDuration = (duration) => {
+  if (typeof duration === 'number') {
+    return duration * 60; // Convert minutes to seconds
+  }
+  
+  if (typeof duration === 'string') {
+    const [minutes, seconds] = duration.split(':').map(Number);
+    if (!isNaN(minutes) && !isNaN(seconds)) {
+      return (minutes * 60) + seconds;
+    }
+  }
+  
+  throw new Error('Invalid duration format');
 };
