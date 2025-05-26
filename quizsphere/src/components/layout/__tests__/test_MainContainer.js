@@ -1,11 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, useTheme, useMediaQuery } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { useTheme, useMediaQuery } from '@mui/material';
 import MainContainer from '../MainContainer';
 
-// Create a comprehensive mock theme that matches Material UI's structure
-const mockTheme = {
+import { createTheme } from '@mui/material/styles';
+
+// Create a proper Material UI theme
+const mockTheme = createTheme({
   palette: {
     primary: { 
       main: '#1976d2',
